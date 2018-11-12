@@ -4,11 +4,11 @@ Divyesh Chitroda
 
 References:
 1. Line[181-210] - Adapted from Artificial Intelligence: A Modern Approach, 3rd. Edition, Stuart J. Russell and Peter Norvig, p. 84. Prentice Hall, 2009.
-2. heapq module for frontier priority queue - Adapted from Documentation, The Python Standard Library, https://docs.python.org/3/library/heapq.html
+2. heapq module for beam priority queue - Adapted from Documentation, The Python Standard Library, https://docs.python.org/3/library/heapq.html
 3. Line[144] - operator overloading for membership testing - Adapted from Stackoverflow, Check if heapq contains value, https://stackoverflow.com/questions/25316694/check-if-heapq-contains-value
 
 Libraries:
-1. heapq - to store frontier nodes as priority queue and perform membership testing.
+1. heapq - to store beam nodes as priority queue and perform membership testing.
 2. random - to generate random size problems with random start and goal state.
 3. time - to calculate time taken for the algorithm to solve the problem.
 ---------------------------------------------------------------------------------
@@ -181,28 +181,28 @@ def solve(start, goal, Problem, k = 10):
     Returns: string. Sequence of actions to take on start state to reach
     the goal state.
     """
-    frontier = []
     beam = []
+    frontier = []
 
     startNode = Node(0, 0, start, None, None)
-    # push the start node to the frontier
-    heappush(frontier, startNode)
-    beam.append(startNode)
+    # push the start node to the beam
+    heappush(beam, startNode)
+    frontier.append(startNode)
 
     while (1):
-        # if all nodes in the frontier are explored and path is not found, then
+        # if all nodes in the beam are explored and path is not found, then
         # there exists no path.
-        if len(frontier) == 0:
+        if len(beam) == 0:
             return "Path does not exists."
 
-        frontier = nsmallest(k, beam)
-        beam = []
+        beam = nsmallest(k, frontier)
+        frontier = []
         # print("----------------------------------------------")
-        # for item in frontier:
+        # for item in beam:
         #     print(item)
         
-        # select state with least cost from frontier            
-        for node in frontier:
+        # select state with least cost from beam            
+        for node in beam:
             # get the list of all possible actions on the state
             Actions = findActions(Problem, node.state)
 
@@ -213,36 +213,36 @@ def solve(start, goal, Problem, k = 10):
 
                 if neighbour != None:
                     # goal test the current node
-                    goalNode = goalTest(neighbour, goal, frontier)
+                    goalNode = goalTest(neighbour, goal, beam)
                     if goalNode:
                         # get the solution(seq. of actions)
                         return getSolution(goalNode)
 
-                    # check if child is already explored or present in frontier and
-                    # (Ref: Line 144)replace the frontier node with child if the child has lower cost
-                    if neighbour not in beam:
+                    # check if child is already explored or present in beam and
+                    # (Ref: Line 144)replace the beam node with child if the child has lower cost
+                    if neighbour not in frontier:
                         # add node with current state and path cost to reach the node from
-                        # the start state to the frontier
-                        beam.append(neighbour)
+                        # the start state to the beam
+                        frontier.append(neighbour)
 
                 
 
-def goalTest(node, goal, frontier):
+def goalTest(node, goal, beam):
     """
     Test whether the goal state has been reached, if not find a goal state
-    in frontier that is satisfiable(<= 300 calories), but not optimal.
+    in beam that is satisfiable(<= 300 calories), but not optimal.
 
     Args:
         node: Object - Node. The node to test for goal.
         goal: tuple(x,y). The goal state.
-        frontier: []. list of frontier nodes prioritized by estimated cost
+        beam: []. list of beam nodes prioritized by estimated cost
         to reach the goal.
 
     Returns: Object- Node. The goal node that is either satisfiable or optimal.
     """
     if node.state == goal:
         return node
-    # for node in frontier:
+    # for node in beam:
     #     if node.state == goal and node.actualCost <= satisficity:
     #         return node
 

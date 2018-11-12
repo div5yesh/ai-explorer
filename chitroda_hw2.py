@@ -16,10 +16,11 @@ Libraries:
 from heapq import *
 import random
 import time
+import sys
 
 # path cost for traversing various terrains.
 # Mountain = 100calories, Sand = 30calories, Path = 10calories
-problemPathCost = {'p': 10, 's': 30, 'm': 100}
+problemPathCost = {'P': 10, 'S': 30, 'M': 100, 'W': sys.maxsize}
 
 # cost of acceptable but not optimal path(calories)
 # satisficity = 300
@@ -104,7 +105,7 @@ def heuristicCost(state, goal):
 
     Returns: int. Estimated cost to reach the goal
     """
-    return (abs(goal[0] - state[0]) + abs(goal[1] - state[1])) * problemPathCost['p']
+    return (abs(goal[0] - state[0]) + abs(goal[1] - state[1])) * problemPathCost['P']
 
 def getSolution(node):
     """
@@ -260,22 +261,33 @@ def test():
     2. (4x4)matrix, start = (0, 0), goal = (2, 2), path = SSSEEN
     3. (5x5)matrix, start = (0, 1), goal = (2, 1), path = SS
     """
-    print(solve((1, 0), (2, 2), [['p', 'p', 'p'], ['p', 'm', 'p'], ['s', 's', 's']]))
-    print(solve((0, 0), (2, 2), [['m','m','m','s'], ['m','m','m','s'], ['m','m','m','s'], ['p','p','p','p']]))
-    print(solve((0, 1), (2, 1), [['m', 'p', 'p', 'p', 'p'], ['m', 'm', 'm', 'm', 'p'], ['m', 'p', 'm', 'm', 'p'],
-        ['m', 'p', 'm', 'm', 'p'], ['m', 'p', 'p', 'p', 'p']]))
+    # print(solve((1, 0), (2, 2), [['p', 'p', 'p'], ['p', 'm', 'p'], ['s', 's', 's']]))
+    # print(solve((0, 0), (2, 2), [['m','m','m','s'], ['m','m','m','s'], ['m','m','m','s'], ['p','p','p','p']]))
+    # print(solve((0, 1), (2, 1), [['m', 'p', 'p', 'p', 'p'], ['m', 'm', 'm', 'm', 'p'], ['m', 'p', 'm', 'm', 'p'],
+    #     ['m', 'p', 'm', 'm', 'p'], ['m', 'p', 'p', 'p', 'p']]))
+    
+    print(solve((6, 7), (6, 2), [
+        ['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'],
+        ['M', 'M', 'S', 'S', 'S', 'P', 'P', 'W'],
+        ['S', 'S', 'P', 'S', 'P', 'S', 'M', 'W'],
+        ['P', 'W', 'M', 'S', 'S', 'S', 'W', 'W'],
+        ['W', 'W', 'M', 'W', 'W', 'M', 'P', 'P'],
+        ['W', 'P', 'W', 'W', 'S', 'P', 'W', 'M'],
+        ['M', 'S', 'S', 'W', 'W', 'P', 'P', 'P'],
+        ['S', 'S', 'P', 'M', 'M', 'P', 'W', 'W']
+    ]))
 
     """
     Testing randomly generated problems
     """
-    randomTest1 = generateTestProblem()
-    # log the start time before solving
-    start = time.time()
-    print(solve(randomTest1[0], randomTest1[1], randomTest1[2]))
-    # log the end time after solving
-    end = time.time()
-    # print total time required to solve the problem
-    print(end - start)
+    # randomTest1 = generateTestProblem()
+    # # log the start time before solving
+    # start = time.time()
+    # print(solve(randomTest1[0], randomTest1[1], randomTest1[2]))
+    # # log the end time after solving
+    # end = time.time()
+    # # print total time required to solve the problem
+    # print(end - start)
 
 """
 Randomly Generated Test Examples:
@@ -298,4 +310,4 @@ SSSWWWSSWWSWSSWWWWWNNWWWWWWWWWWWWSSWWSWWSSWSSSWSSWWSWSWWWNWWWWWWWWSWWWSWWSSWSSSS
 WWNWWNWWWWWSWWNWWWWWWWSSWWWSWSSWSSSWWSWSWWWWWWWWWWSWWWSSSWWSWSWWWWWWWWW
 """
 
-# test()
+test()

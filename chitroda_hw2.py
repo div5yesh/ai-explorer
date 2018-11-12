@@ -204,14 +204,6 @@ def solve(start, goal, Problem, k = 10):
         
         # select state with least cost from frontier            
         for node in frontier:
-            # print(node.state)
-
-            # goal test the current node
-            goalNode = goalTest(node, goal, frontier)
-            if goalNode:
-                # get the solution(seq. of actions)
-                return getSolution(goalNode)
-
             # add state to explored set
             explored.add(node.state)
 
@@ -222,13 +214,22 @@ def solve(start, goal, Problem, k = 10):
             for action in Actions:            
                 # generate a child node by applying actions to the current state
                 neighbour = generateChild(Problem, goal, node, action)
+
                 if neighbour != None:
+                    # goal test the current node
+                    goalNode = goalTest(neighbour, goal, frontier)
+                    if goalNode:
+                        # get the solution(seq. of actions)
+                        return getSolution(goalNode)
+
                     # check if child is already explored or present in frontier and
                     # (Ref: Line 144)replace the frontier node with child if the child has lower cost
                     if neighbour.state not in explored and neighbour not in frontier:
                         # add node with current state and path cost to reach the node from
                         # the start state to the frontier
                         beam.append(neighbour)
+
+                
 
 def goalTest(node, goal, frontier):
     """

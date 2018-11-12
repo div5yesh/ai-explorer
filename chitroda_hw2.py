@@ -25,7 +25,7 @@ problemPathCost = {'P': 10, 'S': 30, 'M': 100, 'W': sys.maxsize}
 # cost of acceptable but not optimal path(calories)
 # satisficity = 300
 
-def findActions(size, state):
+def findActions(problem, state):
     """
     Find all legal actions allowed on the state.
 
@@ -35,14 +35,15 @@ def findActions(size, state):
 
     Returns: [] -> list of actions.
     """
+    size = len(problem) - 1
     legalActions = []
-    if state[0] > 0:
+    if state[0] > 0 and problem[state[0] - 1][state[1]] != 'W':
         legalActions.append('N')
-    if state[0] < size:
+    if state[0] < size and problem[state[0] + 1][state[1]] != 'W':
         legalActions.append('S')
-    if state[1] > 0:
+    if state[1] > 0 and problem[state[0]][state[1] - 1] != 'W':
         legalActions.append('W')
-    if state[1] < size:
+    if state[1] < size and problem[state[0]][state[1] + 1] != 'W':
         legalActions.append('E')
     return legalActions
 
@@ -91,7 +92,7 @@ def generateChild(problem, goal, node, action):
     heuristic = heuristicCost(state, goal)
     # calculate F(n) = estimated cost to reach the goal state
     estimateCost = actualCost + heuristic
-    return Node(estimateCost, actualCost, state, node, action)
+    return Node(actualCost, actualCost, state, node, action)
 
 def heuristicCost(state, goal):
     """
@@ -153,8 +154,8 @@ class Node:
         """
         if other:
             if self.state == other.state:
-                if self.estimateCost < other.estimateCost:
-                    other = self
+                # if self.actualCost < other.actualCost:
+                #     other = self
                 return True
 
     def __lt__(self, other):
@@ -162,9 +163,12 @@ class Node:
         Less than operator overload to compare estimated costs for heapify
         comparisions in heapq, using the priority as estimated cost.
         """
-        return self.estimateCost < other.estimateCost
+        return self.actualCost < other.actualCost
+    
+    def __str__(self):
+        return str(self.state)
 
-def solve(start, goal, Problem):
+def solve(start, goal, Problem, k = 10):
     """
     Find the list of actions to perform on the start state to reach the goal
     state throug optimal path with least cost.
@@ -179,9 +183,12 @@ def solve(start, goal, Problem):
     """
     explored = set()
     frontier = []
+    beam = []
 
+    startNode = Node(0, 0, start, None, None)
     # push the start node to the frontier
-    heappush(frontier, Node(heuristicCost(start, goal), 0, start, None, None))
+    heappush(frontier, startNode)
+    beam.append(startNode)
 
     while (1):
         # if all nodes in the frontier are explored and path is not found, then
@@ -189,31 +196,39 @@ def solve(start, goal, Problem):
         if len(frontier) == 0:
             return "Path does not exists."
 
-        # select state with least cost from frontier
-        node = heappop(frontier)
-        # print(node.state)
-        # goal test the current node
-        goalNode = goalTest(node, goal, frontier)
-        if goalNode:
-            # get the solution(seq. of actions)
-            return getSolution(goalNode)
+        frontier = nsmallest(k, beam)
+        beam = []
+        # print("----------------------------------------------")
+        # for item in frontier:
+        #     print(item)
+        
+        # select state with least cost from frontier            
+        for node in frontier:
+            # print(node.state)
 
-        # add state to explored set
-        explored.add(node.state)
+            # goal test the current node
+            goalNode = goalTest(node, goal, frontier)
+            if goalNode:
+                # get the solution(seq. of actions)
+                return getSolution(goalNode)
 
-        # get the list of all possible actions on the state
-        Actions = findActions(len(Problem) - 1, node.state)
-        # expand a node and generate children
-        for action in Actions:
-            # generate a child node by applying actions to the current state
-            child = generateChild(Problem, goal, node, action)
-            if child != None:
-                # check if child is already explored or present in frontier and
-                # (Ref: Line 144)replace the frontier node with child if the child has lower cost
-                if child.state not in explored and child not in frontier:
-                    # add node with current state and path cost to reach the node from
-                    # the start state to the frontier
-                    heappush(frontier, child)
+            # add state to explored set
+            explored.add(node.state)
+
+            # get the list of all possible actions on the state
+            Actions = findActions(Problem, node.state)
+
+            # expand a node and generate children
+            for action in Actions:            
+                # generate a child node by applying actions to the current state
+                neighbour = generateChild(Problem, goal, node, action)
+                if neighbour != None:
+                    # check if child is already explored or present in frontier and
+                    # (Ref: Line 144)replace the frontier node with child if the child has lower cost
+                    if neighbour.state not in explored and neighbour not in frontier:
+                        # add node with current state and path cost to reach the node from
+                        # the start state to the frontier
+                        beam.append(neighbour)
 
 def goalTest(node, goal, frontier):
     """
@@ -247,7 +262,7 @@ def generateTestProblem():
     print(start)
     goal = (random.randint(0, size - 1), random.randint(0, size - 1))
     print(goal)
-    terrain = [[random.choice(['m', 'p', 's']) for i in range(0, size)] for j in range(0, size)]
+    terrain = [[random.choice(['M', 'P', 'S', 'W']) for i in range(0, size)] for j in range(0, size)]
     # print the terrain matrix if required
     # for i in range(0, size):
     #     print(terrain[i])

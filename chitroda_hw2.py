@@ -181,7 +181,6 @@ def solve(start, goal, Problem, k = 10):
     Returns: string. Sequence of actions to take on start state to reach
     the goal state.
     """
-    explored = set()
     frontier = []
     beam = []
 
@@ -204,9 +203,6 @@ def solve(start, goal, Problem, k = 10):
         
         # select state with least cost from frontier            
         for node in frontier:
-            # add state to explored set
-            explored.add(node.state)
-
             # get the list of all possible actions on the state
             Actions = findActions(Problem, node.state)
 
@@ -224,7 +220,7 @@ def solve(start, goal, Problem, k = 10):
 
                     # check if child is already explored or present in frontier and
                     # (Ref: Line 144)replace the frontier node with child if the child has lower cost
-                    if neighbour.state not in explored and neighbour not in frontier:
+                    if neighbour not in beam:
                         # add node with current state and path cost to reach the node from
                         # the start state to the frontier
                         beam.append(neighbour)

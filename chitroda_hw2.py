@@ -20,7 +20,7 @@ import sys
 
 # path cost for traversing various terrains.
 # Mountain = 100calories, Sand = 30calories, Path = 10calories
-problemPathCost = {'P': 10, 'S': 30, 'M': 100, 'W': sys.maxsize}
+problemPathCost = {'p': 10, 's': 30, 'm': 100, 'w': sys.maxsize}
 
 # cost of acceptable but not optimal path(calories)
 # satisficity = 300
@@ -37,13 +37,13 @@ def findActions(problem, state):
     """
     size = len(problem) - 1
     legalActions = []
-    if state[0] > 0 and problem[state[0] - 1][state[1]] != 'W':
+    if state[0] > 0 and problem[state[0] - 1][state[1]] != 'w':
         legalActions.append('N')
-    if state[0] < size and problem[state[0] + 1][state[1]] != 'W':
+    if state[0] < size and problem[state[0] + 1][state[1]] != 'w':
         legalActions.append('S')
-    if state[1] > 0 and problem[state[0]][state[1] - 1] != 'W':
+    if state[1] > 0 and problem[state[0]][state[1] - 1] != 'w':
         legalActions.append('W')
-    if state[1] < size and problem[state[0]][state[1] + 1] != 'W':
+    if state[1] < size and problem[state[0]][state[1] + 1] != 'w':
         legalActions.append('E')
     return legalActions
 
@@ -106,7 +106,7 @@ def heuristicCost(state, goal):
 
     Returns: int. Estimated cost to reach the goal
     """
-    return (abs(goal[0] - state[0]) + abs(goal[1] - state[1])) * problemPathCost['P']
+    return (abs(goal[0] - state[0]) + abs(goal[1] - state[1])) * problemPathCost['p']
 
 def getSolution(node):
     """
@@ -282,14 +282,14 @@ def test():
     #     ['m', 'p', 'm', 'm', 'p'], ['m', 'p', 'p', 'p', 'p']]))
     
     print(solve((6, 7), (6, 2), [
-        ['W', 'W', 'W', 'W', 'W', 'W', 'W', 'W'],
-        ['M', 'M', 'S', 'S', 'S', 'P', 'P', 'W'],
-        ['S', 'S', 'P', 'S', 'P', 'S', 'M', 'W'],
-        ['P', 'W', 'M', 'S', 'S', 'S', 'W', 'W'],
-        ['W', 'W', 'M', 'W', 'W', 'M', 'P', 'P'],
-        ['W', 'P', 'W', 'W', 'S', 'P', 'W', 'M'],
-        ['M', 'S', 'S', 'W', 'W', 'P', 'P', 'P'],
-        ['S', 'S', 'P', 'M', 'M', 'P', 'W', 'W']
+        ['w', 'w', 'w', 'w', 'w', 'w', 'w', 'w'],
+        ['m', 'm', 's', 's', 's', 'p', 'p', 'w'],
+        ['s', 's', 'p', 's', 'p', 's', 'm', 'w'],
+        ['p', 'w', 'm', 's', 's', 's', 'w', 'w'],
+        ['w', 'w', 'm', 'w', 'w', 'm', 'p', 'p'],
+        ['w', 'p', 'w', 'w', 's', 'p', 'w', 'm'],
+        ['m', 's', 's', 'w', 'w', 'p', 'p', 'p'],
+        ['s', 's', 'p', 'm', 'm', 'p', 'w', 'w']
     ]))
 
     """

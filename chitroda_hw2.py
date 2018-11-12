@@ -229,9 +229,9 @@ def goalTest(node, goal, frontier):
     """
     if node.state == goal:
         return node
-    for node in frontier:
-        if node.state == goal and node.actualCost <= satisficity:
-            return node
+    # for node in frontier:
+    #     if node.state == goal and node.actualCost <= satisficity:
+    #         return node
 
 def generateTestProblem():
     """

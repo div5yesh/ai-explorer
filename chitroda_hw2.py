@@ -1,6 +1,5 @@
 """
-CMSC 671 Fall 2018 – Homework 2
-Divyesh Chitroda
+CMSC 671 Fall 2018 – Project - AI-Explorer
 
 References:
 1. Line[181-210] - Adapted from Artificial Intelligence: A Modern Approach, 3rd. Edition, Stuart J. Russell and Peter Norvig, p. 84. Prentice Hall, 2009.

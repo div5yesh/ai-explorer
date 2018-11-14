@@ -21,6 +21,7 @@ import sys
 # path cost for traversing various terrains.
 # Mountain = 100calories, Sand = 30calories, Path = 10calories
 problemPathCost = {'p': 10, 's': 30, 'm': 100, 'w': sys.maxsize}
+BEAM_SIZE = 10
 
 # cost of acceptable but not optimal path(calories)
 # satisficity = 300
@@ -183,11 +184,11 @@ def solve(start, goal, Problem, k = 10):
     """
     beam = []
     frontier = []
-
     startNode = Node(0, 0, start, None, None)
     # push the start node to the beam
     heappush(beam, startNode)
-    frontier.append(startNode)
+    heappush(frontier, startNode)
+    # frontier.append(startNode)
 
     while (1):
         # if all nodes in the beam are explored and path is not found, then
@@ -195,7 +196,7 @@ def solve(start, goal, Problem, k = 10):
         if len(beam) == 0:
             return "Path does not exists."
 
-        beam = nsmallest(k, frontier)
+        beam = frontier[:]
         frontier = []
         # print("----------------------------------------------")
         # for item in beam:
@@ -221,10 +222,10 @@ def solve(start, goal, Problem, k = 10):
                     # check if child is already explored or present in beam and
                     # (Ref: Line 144)replace the beam node with child if the child has lower cost
                     if neighbour not in frontier:
-                        # add node with current state and path cost to reach the node from
-                        # the start state to the beam
-                        frontier.append(neighbour)
-
+                        #add node to frontier only if it can contain within best k nodes
+                        heappush(frontier, neighbour)
+                        if(len(frontier) > BEAM_SIZE):
+                            del frontier[-1]
                 
 
 def goalTest(node, goal, beam):

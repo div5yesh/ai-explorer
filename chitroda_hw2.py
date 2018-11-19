@@ -18,6 +18,7 @@ import sys
 # path cost for traversing various terrains.
 # Mountain = 100calories, Sand = 30calories, Path = 10calories
 problemPathCost = {'p': 10, 's': 30, 'm': 100, 'w': sys.maxsize}
+BEAM_SIZE = 10
 
 # TODO: Experiment Beam sizes
 BEAM_SIZE = 8
@@ -223,7 +224,7 @@ def solve(start, goal, Problem, turns = 0):
                     heappush(frontier, neighbour)
                     # if(len(frontier) > BEAM_SIZE):
                         # del frontier[-1]
-
+                
         turn = turn + 1
 
     return getSolution(frontier[0])

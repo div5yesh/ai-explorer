@@ -17,8 +17,7 @@ import sys
 
 # path cost for traversing various terrains.
 # Mountain = 100calories, Sand = 30calories, Path = 10calories
-problemPathCost = {'p': 10, 's': 30, 'm': 100, 'w': sys.maxsize}
-BEAM_SIZE = 10
+problemPathCost = {'p': 10, 's': 30, 'm': 100, 'w': 1000}
 
 # TODO: Experiment Beam sizes
 BEAM_SIZE = 8
@@ -90,6 +89,31 @@ def generateChild(problem, goal, node, action):
     estimateCost = problemPathCost[problem[state[0]][state[1]]]
     return Node(estimateCost, 0, state, node, action)
 
+def neighbours(state):
+    # topleft
+    yield (state[0] - 1, state[1] - 1)
+    # top
+    yield (state[0] - 1, state[1])
+    # topright
+    yield (state[0] - 1, state[1] + 1)
+    # right
+    yield (state[0], state[1] + 1)
+    # bottomright
+    yield (state[0] + 1, state[1] + 1)
+    # bottom
+    yield (state[0] + 1, state[1])
+    # bottomleft
+    yield (state[0] + 1, state[1] - 1)
+    # left
+    yield (state[0], state[1] - 1)
+
+def evaluateCurrentPosition(problem, state):
+    value = 0
+    for neighbour in neighbours(state):
+        value += problemPathCost[problem[neighbour[0]][neighbour[1]]]
+
+    return value
+
 def heuristicCost(state, goal):
     """
     Calculate the heuristic cost i.e. the Manhattan distance, to reach the goal
@@ -117,11 +141,6 @@ def getSolution(node):
         node = node.parent
 
     return path
-
-class Problem:
-
-    def __init__(self, goal):
-        self.goal = goal
 
 class Node:
     """
@@ -160,7 +179,7 @@ class Node:
     def __str__(self):
         return str(self.state)
 
-def solve(start, goal, Problem, turns = 0):
+def solve(start, goal, problem, turns = 0):
     """
     Find the list of actions to perform on the start state to reach the goal
     state throug optimal path with least cost.
@@ -200,14 +219,14 @@ def solve(start, goal, Problem, turns = 0):
         # select state with least cost from beam
         # for node in beam:
         # get the list of all possible actions on the state
-        Actions = findActions(Problem, node.state)
+        Actions = findActions(problem, node.state)
 
         print(node, node.action)
 
         # expand a node and generate children
         for action in Actions:
             # generate a child node by applying actions to the current state
-            neighbour = generateChild(Problem, goal, node, action)
+            neighbour = generateChild(problem, goal, node, action)
 
             if neighbour != None:
                 # goal test the current node
@@ -224,7 +243,7 @@ def solve(start, goal, Problem, turns = 0):
                     heappush(frontier, neighbour)
                     # if(len(frontier) > BEAM_SIZE):
                         # del frontier[-1]
-                
+
         turn = turn + 1
 
     return getSolution(frontier[0])

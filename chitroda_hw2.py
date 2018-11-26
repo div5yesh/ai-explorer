@@ -20,7 +20,7 @@ import sys
 problemPathCost = {'p': 10, 's': 30, 'm': 100, 'w': 1000}
 
 # TODO: Experiment Beam sizes
-BEAM_SIZE = 8
+BEAM_SIZE = 10
 
 # cost of acceptable but not optimal path(calories)
 # satisficity = 300
@@ -126,6 +126,33 @@ def heuristicCost(state, goal):
     """
     return (abs(goal[0] - state[0]) + abs(goal[1] - state[1])) * problemPathCost['p']
 
+def printPath(path):
+    exploration = ""
+    for node in path:
+        if node.action:
+            exploration = exploration + node.action
+    return exploration
+
+def reverseAction(action):
+    revAct = {
+        "N": "S",
+        "E": "W",
+        "W": "E",
+        "S": "N"
+    }
+    return revAct[action]
+
+def backtrackAgent(node, target, explorationPath):
+    node = explorationPath
+    explorationPath = Node(0, 0, node.parent.state, node, reverseAction(node.action))
+    # path = [(node.parent.state, reverseAction(node.action))]
+    while node.parent != target.parent and node.parent != target:
+        node = node.parent
+        explorationPath = Node(0, 0, node.parent.state, node, reverseAction(node.action))
+        # path.append((node.parent.state, reverseAction(node.action)))
+
+    return explorationPath
+
 def getSolution(node):
     """
     Print the solution path by backtracking to the root node
@@ -137,7 +164,7 @@ def getSolution(node):
     """
     path = ""
     while node.parent:
-        path = node.action + path
+        path = path + node.action
         node = node.parent
 
     return path
@@ -165,8 +192,6 @@ class Node:
         """
         if other:
             if self.state == other.state:
-                # if self.actualCost < other.actualCost:
-                #     other = self
                 return True
 
     def __lt__(self, other):
@@ -179,7 +204,11 @@ class Node:
     def __str__(self):
         return str(self.state)
 
-def solve(start, goal, problem, turns = 0):
+def getBestNodeDistance(current, best):
+    return (abs(current[0] - best[0]) + abs(current[1] - best[1]))
+
+
+def solve(start, goal, problem):
     """
     Find the list of actions to perform on the start state to reach the goal
     state throug optimal path with least cost.
@@ -190,31 +219,33 @@ def solve(start, goal, problem, turns = 0):
     Returns: string. Sequence of actions to take on start state to reach
     the goal state.
     """
-    # beam = []
     explored = set()
     frontier = []
-    startNode = Node(0, 0, start, None, None)
+    node = Node(0, 0, start, None, None)
     # push the start node to the beam
-    # heappush(beam, startNode)
-    heappush(frontier, startNode)
-    # frontier.append(startNode)
+    heappush(frontier, node)
+    # explorationPath = []
+    head = None
 
-    turn = 0
-    while (turn < turns or turns == 0):
+    while (True):
         # if all nodes in the beam are explored and path is not found, then
         # there exists no path.
         if len(frontier) == 0:
             return "Path does not exists."
 
+        prevnode = node
         node = heappop(frontier)
+
+        # if node.state in explored:
+        if getBestNodeDistance(prevnode.state, node.state) > 1:
+            # explorationPath.extend(backtrackAgent(prevnode, node, explorationPath))
+            head = backtrackAgent(prevnode, node, head)
+
         explored.add(node.state)
+
+        head = Node(0, 0, node.state, head, node.action)
+        # explorationPath.append((node.state, node.action))
         # TODO: Backtracking and print explored path
-
-        # frontier = []
-        # print("----------------------------------------------")
-        # for item in beam:
-        #     print(item)
-
 
         # select state with least cost from beam
         # for node in beam:
@@ -230,26 +261,20 @@ def solve(start, goal, problem, turns = 0):
 
             if neighbour != None:
                 # goal test the current node
-                goalNode = goalTest(neighbour, goal, frontier)
-                if goalNode:
+                if goalTest(neighbour, goal):
                     print(neighbour, neighbour.action)
                     # get the solution(seq. of actions)
-                    return ""#getSolution(goalNode)
+                    return getSolution(head)
 
                 # check if child is already explored or present in beam and
                 # (Ref: Line 144)replace the beam node with child if the child has lower cost
                 if neighbour not in frontier and neighbour.state not in explored:
                     #add node to frontier only if it can contain within best k nodes
                     heappush(frontier, neighbour)
-                    # if(len(frontier) > BEAM_SIZE):
-                        # del frontier[-1]
+                    if(len(frontier) > BEAM_SIZE):
+                        del frontier[-1]
 
-        turn = turn + 1
-
-    return getSolution(frontier[0])
-
-
-def goalTest(node, goal, frontier):
+def goalTest(node, goal):
     """
     Test whether the goal state has been reached, if not find a goal state
     in frontier that is satisfiable(<= 300 calories), but not optimal.

@@ -1,5 +1,7 @@
 """
 CMSC 671 Fall 2018 – Project - AI-Explorer
+Team Name: Agent Rogue
+Team Members: Anushree Desai, Hakju Oh, Shree Hari, Divyesh Chitroda
 References:
 1. Line[181-210] - Adapted from Artificial Intelligence: A Modern Approach, 3rd. Edition, Stuart J. Russell and Peter Norvig, p. 84. Prentice Hall, 2009.
 2. heapq module for beam priority queue - Adapted from Documentation, The Python Standard Library, https://docs.python.org/3/library/heapq.html
@@ -17,13 +19,10 @@ import sys
 
 # path cost for traversing various terrains.
 # Mountain = 100calories, Sand = 30calories, Path = 10calories
-problemPathCost = {'p': 10, 's': 30, 'm': 100, 'w': 1000}
+problemPathCost = {'p': 10, 's': 30, 'm': 100, 'w': 1000, 'u': 1000}
 
 # TODO: Experiment Beam sizes
 BEAM_SIZE = 10
-
-# cost of acceptable but not optimal path(calories)
-# satisficity = 300
 
 def findActions(problem, state):
     """
@@ -80,13 +79,13 @@ def generateChild(problem, goal, node, action):
     """
     # get the next state
     state = applyAction(node.state, action)
-    # calculate actual cost
-    # TODO: Use actual cost to cacluate heuristic
-    # actualCost = node.actualCost + problemPathCost[problem[state[0]][state[1]]]
     # calculate hueristic cost
-    heuristic = heuristicCost(state, goal)
-    # calculate F(n) = estimated cost to reach the goal state
     estimateCost = problemPathCost[problem[state[0]][state[1]]]
+    return Node(estimateCost, 0, state, node, action)
+
+def generateBacktrackNode(problem, goal, node, action):
+    state = applyAction(node.state, action)
+    estimateCost = node.actualCost + problemPathCost[problem[state[0]][state[1]]]
     return Node(estimateCost, 0, state, node, action)
 
 def neighbours(state):
@@ -126,34 +125,7 @@ def heuristicCost(state, goal):
     """
     return (abs(goal[0] - state[0]) + abs(goal[1] - state[1])) * problemPathCost['p']
 
-def printPath(path):
-    exploration = ""
-    for node in path:
-        if node.action:
-            exploration = exploration + node.action
-    return exploration
-
-def reverseAction(action):
-    revAct = {
-        "N": "S",
-        "E": "W",
-        "W": "E",
-        "S": "N"
-    }
-    return revAct[action]
-
-def backtrackAgent(node, target, explorationPath):
-    node = explorationPath
-    explorationPath = Node(0, 0, node.parent.state, node, reverseAction(node.action))
-    # path = [(node.parent.state, reverseAction(node.action))]
-    while node.parent != target.parent and node.parent != target:
-        node = node.parent
-        explorationPath = Node(0, 0, node.parent.state, node, reverseAction(node.action))
-        # path.append((node.parent.state, reverseAction(node.action)))
-
-    return explorationPath
-
-def getSolution(node):
+def getExploredStates(node):
     """
     Print the solution path by backtracking to the root node
     following throught all the parent nodes.
@@ -162,9 +134,9 @@ def getSolution(node):
     Returns: string. String of actions performed on root node
     to reach the goal node.
     """
-    path = ""
+    path = []
     while node.parent:
-        path = path + node.action
+        path.insert(0, node.state)
         node = node.parent
 
     return path
@@ -207,6 +179,27 @@ class Node:
 def getBestNodeDistance(current, best):
     return (abs(current[0] - best[0]) + abs(current[1] - best[1]))
 
+def backtrackSearch(start, goal, problem):
+
+    explored = set()
+    frontier = []
+    node = Node(0, 0, start.state, None, None)
+    heappush(frontier, node)
+    while (True):
+        if len(frontier) == 0:
+            return "Path does not exists."
+
+        node = heappop(frontier)
+        if goalTest(node, goal.state):
+            return getExploredStates(node)
+
+        explored.add(node.state)
+        Actions = findActions(problem, node.state)
+        for action in Actions:
+            neighbour = generateBacktrackNode(problem, goal, node, action)
+            if neighbour != None:
+                if neighbour not in frontier and neighbour.state not in explored:
+                    heappush(frontier, neighbour)
 
 def solve(start, goal, problem):
     """
@@ -224,7 +217,7 @@ def solve(start, goal, problem):
     node = Node(0, 0, start, None, None)
     # push the start node to the beam
     heappush(frontier, node)
-    # explorationPath = []
+    explorationPath = []
     head = None
 
     while (True):
@@ -239,16 +232,15 @@ def solve(start, goal, problem):
         # if node.state in explored:
         if getBestNodeDistance(prevnode.state, node.state) > 1:
             # explorationPath.extend(backtrackAgent(prevnode, node, explorationPath))
-            head = backtrackAgent(prevnode, node, head)
+            # head = backtrackAgent(prevnode, node, head)
+            explorationPath.extend(backtrackSearch(prevnode, node, problem))
+        else:
+            explorationPath.append(node.state)
 
         explored.add(node.state)
 
-        head = Node(0, 0, node.state, head, node.action)
-        # explorationPath.append((node.state, node.action))
-        # TODO: Backtracking and print explored path
+        # head = Node(0, 0, node.state, head, node.action)
 
-        # select state with least cost from beam
-        # for node in beam:
         # get the list of all possible actions on the state
         Actions = findActions(problem, node.state)
 
@@ -264,15 +256,17 @@ def solve(start, goal, problem):
                 if goalTest(neighbour, goal):
                     print(neighbour, neighbour.action)
                     # get the solution(seq. of actions)
-                    return getSolution(head)
+                    return getExploredPath(explorationPath)
 
-                # check if child is already explored or present in beam and
-                # (Ref: Line 144)replace the beam node with child if the child has lower cost
+                # check if child is already explored or present in beam
                 if neighbour not in frontier and neighbour.state not in explored:
                     #add node to frontier only if it can contain within best k nodes
                     heappush(frontier, neighbour)
                     if(len(frontier) > BEAM_SIZE):
                         del frontier[-1]
+
+def getExploredPath(path):
+    return path
 
 def goalTest(node, goal):
     """

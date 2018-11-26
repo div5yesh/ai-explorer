@@ -52,7 +52,6 @@ def applyAction(state, action):
         action: character - 'N'. Action to perform.
     Returns: tuple -> (x,y). Next state of the agent.
     """
-    # print(action)
     if action == 'N':
         return (state[0] - 1, state[1])
 
@@ -80,7 +79,7 @@ def generateChild(problem, goal, node, action):
     # get the next state
     state = applyAction(node.state, action)
     # calculate hueristic cost
-    estimateCost = problemPathCost[problem[state[0]][state[1]]]
+    estimateCost = evaluateCurrentPosition(problem, state)
     return Node(estimateCost, 0, state, node, action)
 
 def generateBacktrackNode(problem, goal, node, action):
@@ -88,42 +87,57 @@ def generateBacktrackNode(problem, goal, node, action):
     estimateCost = node.actualCost + problemPathCost[problem[state[0]][state[1]]]
     return Node(estimateCost, 0, state, node, action)
 
-def neighbours(state):
+def neighbours(state, size):
     # topleft
-    yield (state[0] - 1, state[1] - 1)
+    # if(state[0] > 0 and state[1] > 0):
+    #     yield (state[0] - 1, state[1] - 1)
+    # else:
+    #     yield None
     # top
-    yield (state[0] - 1, state[1])
+    if state[0] > 0:
+        yield (state[0] - 1, state[1])
+    else:
+        yield None
     # topright
-    yield (state[0] - 1, state[1] + 1)
+    # if state[0] > 0 and state[1] < size:
+    #     yield (state[0] - 1, state[1] + 1)
+    # else:
+    #     yield None
     # right
-    yield (state[0], state[1] + 1)
+    if state[1] < size:
+        yield (state[0], state[1] + 1)
+    else:
+        yield None
     # bottomright
-    yield (state[0] + 1, state[1] + 1)
+    # if state[0] < size and state[1] > size:
+    #     yield (state[0] + 1, state[1] + 1)
+    # else:
+    #     yield None
     # bottom
-    yield (state[0] + 1, state[1])
+    if state[0] < size:
+        yield (state[0] + 1, state[1])
+    else:
+        yield None
     # bottomleft
-    yield (state[0] + 1, state[1] - 1)
+    # if state[0] < size and state[1] > 0:
+    #     yield (state[0] + 1, state[1] - 1)
+    # else:
+    #     yield None
     # left
-    yield (state[0], state[1] - 1)
+    if state[1] > 0:
+        yield (state[0], state[1] - 1)
+    else:
+        yield None
 
 def evaluateCurrentPosition(problem, state):
-    value = 0
-    for neighbour in neighbours(state):
-        value += problemPathCost[problem[neighbour[0]][neighbour[1]]]
+    value = problemPathCost[problem[state[0]][state[1]]]
+    for neighbour in neighbours(state, len(problem) - 1):
+        if neighbour == None:
+            value += 1000
+        else:
+            value += problemPathCost[problem[neighbour[0]][neighbour[1]]]
 
     return value
-
-def heuristicCost(state, goal):
-    """
-    Calculate the heuristic cost i.e. the Manhattan distance, to reach the goal
-    from current state. This is the estimation of how far the goal state is from
-    current state.
-    Args:
-        state: tuple(x,y). The current state.
-        goal: tuple(x,y). The goal state.
-    Returns: int. Estimated cost to reach the goal
-    """
-    return (abs(goal[0] - state[0]) + abs(goal[1] - state[1])) * problemPathCost['p']
 
 def getExploredStates(node):
     """
@@ -218,7 +232,6 @@ def solve(start, goal, problem):
     # push the start node to the beam
     heappush(frontier, node)
     explorationPath = []
-    head = None
 
     while (True):
         # if all nodes in the beam are explored and path is not found, then
@@ -229,23 +242,14 @@ def solve(start, goal, problem):
         prevnode = node
         node = heappop(frontier)
 
-        # if node.state in explored:
         if getBestNodeDistance(prevnode.state, node.state) > 1:
-            # explorationPath.extend(backtrackAgent(prevnode, node, explorationPath))
-            # head = backtrackAgent(prevnode, node, head)
             explorationPath.extend(backtrackSearch(prevnode, node, problem))
         else:
             explorationPath.append(node.state)
 
         explored.add(node.state)
-
-        # head = Node(0, 0, node.state, head, node.action)
-
         # get the list of all possible actions on the state
         Actions = findActions(problem, node.state)
-
-        print(node, node.action)
-
         # expand a node and generate children
         for action in Actions:
             # generate a child node by applying actions to the current state
@@ -254,7 +258,7 @@ def solve(start, goal, problem):
             if neighbour != None:
                 # goal test the current node
                 if goalTest(neighbour, goal):
-                    print(neighbour, neighbour.action)
+                    explorationPath.append(goal)
                     # get the solution(seq. of actions)
                     return getExploredPath(explorationPath)
 
@@ -266,7 +270,20 @@ def solve(start, goal, problem):
                         del frontier[-1]
 
 def getExploredPath(path):
-    return path
+    directionalPath = ""
+    for i in range(len(path)-1):
+        if path[i][0] > path[i + 1][0]:
+            directionalPath = directionalPath + "N"
+        elif path[i][0] < path[i + 1][0]:
+            directionalPath = directionalPath + "S"
+        elif path[i][1] > path[i+1][1]:
+            directionalPath = directionalPath + "W"
+        elif path[i][1] < path[i+1][1]:
+            directionalPath = directionalPath + "E"
+        else:
+            directionalPath = directionalPath + "*"
+
+    return directionalPath
 
 def goalTest(node, goal):
     """

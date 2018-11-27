@@ -19,10 +19,9 @@ import sys
 
 # path cost for traversing various terrains.
 # Mountain = 100calories, Sand = 30calories, Path = 10calories
-problemPathCost = {'p': 10, 's': 30, 'm': 100, 'w': 1000, 'u': 1000}
+problemPathCost = {'p': 10, 's': 30, 'm': 100, 'w': 1000, 'u': -300}
 
-# TODO: Experiment Beam sizes
-BEAM_SIZE = 10
+BEAM_SIZE = 4
 
 def findActions(problem, state):
     """

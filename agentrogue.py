@@ -1,3 +1,8 @@
+"""
+CMSC 671 Fall 2018 – Project - AI-Explorer
+Team Name: Agent Rogue
+Team Members: Anushree Desai, Hakju Oh, Shree Hari, Divyesh Chitroda
+"""
 from agent import BaseAgent
 from utils import Directions
 from heapq import *
@@ -89,15 +94,15 @@ class AgentRogue(BaseAgent):
         else:
             yield None
 
-def evaluateHeuristic(self, problem, state):
-    value = self.problemPathCost[problem[state[0]][state[1]]]
-    for neighbour in self.neighbours(state, len(problem) - 1):
-        if neighbour == None:
-            value += 1000
-        else:
-            value += self.problemPathCost[problem[neighbour[0]][neighbour[1]]]
+    def evaluateHeuristic(self, problem, state):
+        value = self.problemPathCost[problem[state[0]][state[1]]]
+        for neighbour in self.neighbours(state, len(problem) - 1):
+            if neighbour == None:
+                value += 1000
+            else:
+                value += self.problemPathCost[problem[neighbour[0]][neighbour[1]]]
 
-    return value
+        return value
 
 
     def applyAction(self, state, action):
@@ -222,21 +227,7 @@ def evaluateHeuristic(self, problem, state):
         explored = set()
         frontier = []
         node = Node(0, 0, start, None, None)
-        # push the start node to the beam
-        heappush(frontier, node)
         explored.add(node.state)
-        if len(frontier) == 0:
-            return "Path does not exists."
-
-        prevnode = node
-        node = heappop(frontier)
-
-        if self.getBestNodeDistance(prevnode.state, node.state) > 1:
-            backtrackNodes = self.backtrackSearch(prevnode, node, problem)
-            for backTrackNode in len(backtrackNodes):
-                return backTrackNode.action
-        else:
-            return node.action
 
         # get the list of all possible actions on the state
         Actions = self.findActions(problem, node.state)
@@ -248,5 +239,17 @@ def evaluateHeuristic(self, problem, state):
                 #add node to frontier only if it can contain within best k nodes
                 heappush(frontier, neighbour)
 
+        current = node
+        node = heappop(frontier)
+
+        if self.getBestNodeDistance(current.state, node.state) > 1:
+            backtrackNodes = self.backtrackSearch(current, node, problem)
+            for backTrackNode in len(backtrackNodes):
+                return backTrackNode.action
+        else:
+            return node.action
+
     def step(self, location, strength, game_map, map_objects):
-        return self.solve(location, strength, game_map)
+        x = self.solve(location, strength, game_map)
+        print("Action::",x)
+        return x

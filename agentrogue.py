@@ -1,4 +1,5 @@
 from agent import BaseAgent
+from utils import Directions
 from heapq import *
 import random
 import time
@@ -107,16 +108,16 @@ def evaluateHeuristic(self, problem, state):
             action: character - 'N'. Action to perform.
         Returns: tuple -> (x,y). Next state of the agent.
         """
-        if action == 'N':
+        if action == Directions.NORTH:
             return (state[0] - 1, state[1])
 
-        if action == 'E':
+        if action == Directions.EAST:
             return (state[0], state[1] + 1)
 
-        if action == 'W':
+        if action == Directions.WEST:
             return (state[0], state[1] - 1)
 
-        if action == 'S':
+        if action == Directions.SOUTH:
             return (state[0] + 1, state[1])
 
     def generateChild(self, problem, node, action):
@@ -148,13 +149,13 @@ def evaluateHeuristic(self, problem, state):
         size = len(problem) - 1
         legalActions = []
         if state[0] > 0 and problem[state[0] - 1][state[1]] != 'w':
-            legalActions.append('N')
+            legalActions.append(Directions.NORTH)
         if state[0] < size and problem[state[0] + 1][state[1]] != 'w':
-            legalActions.append('S')
+            legalActions.append(Directions.SOUTH)
         if state[1] > 0 and problem[state[0]][state[1] - 1] != 'w':
-            legalActions.append('W')
+            legalActions.append(Directions.WEST)
         if state[1] < size and problem[state[0]][state[1] + 1] != 'w':
-            legalActions.append('E')
+            legalActions.append(Directions.EAST)
         return legalActions
     
     def getBestNodeDistance(self, current, best):

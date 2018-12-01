@@ -4,7 +4,7 @@ Team Name: Agent Rogue
 Team Members: Anushree Desai, Hakju Oh, Shree Hari, Divyesh Chitroda
 """
 from agent import BaseAgent
-from utils import Directions
+from utils import Directions, MapTiles
 from heapq import *
 import random
 import time
@@ -95,12 +95,12 @@ class AgentRogue(BaseAgent):
             yield None
 
     def evaluateHeuristic(self, problem, state):
-        value = self.problemPathCost[problem[state[0]][state[1]]]
+        value = problem[state[0]][state[1]].value
         for neighbour in self.neighbours(state, len(problem) - 1):
             if neighbour == None:
                 value += 1000
             else:
-                value += self.problemPathCost[problem[neighbour[0]][neighbour[1]]]
+                value += problem[neighbour[0]][neighbour[1]].value
 
         return value
 
@@ -151,15 +151,17 @@ class AgentRogue(BaseAgent):
             state: tuple - (x,y). State of the agent on which to perform actions.
         Returns: [] -> list of actions.
         """
+        # print("problem.maptiles: ", MapTiles.W)
+        # print("problem: ", problem[0][0])
         size = len(problem) - 1
         legalActions = []
-        if state[0] > 0 and problem[state[0] - 1][state[1]] != 'w':
+        if state[0] > 0 and problem[state[0] - 1][state[1]] != MapTiles.W:
             legalActions.append(Directions.NORTH)
-        if state[0] < size and problem[state[0] + 1][state[1]] != 'w':
+        if state[0] < size and problem[state[0] + 1][state[1]] != MapTiles.W:
             legalActions.append(Directions.SOUTH)
-        if state[1] > 0 and problem[state[0]][state[1] - 1] != 'w':
+        if state[1] > 0 and problem[state[0]][state[1] - 1] != MapTiles.W:
             legalActions.append(Directions.WEST)
-        if state[1] < size and problem[state[0]][state[1] + 1] != 'w':
+        if state[1] < size and problem[state[0]][state[1] + 1] != MapTiles.W:
             legalActions.append(Directions.EAST)
         return legalActions
     
@@ -251,5 +253,4 @@ class AgentRogue(BaseAgent):
 
     def step(self, location, strength, game_map, map_objects):
         x = self.solve(location, strength, game_map)
-        print("Action::",x)
         return x

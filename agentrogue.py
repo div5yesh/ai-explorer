@@ -5,6 +5,7 @@ Team Members: Anushree Desai, Hakju Oh, Shree Hari, Divyesh Chitroda
 """
 from agent import BaseAgent
 from utils import Directions, MapTiles
+import util_functions as uf
 from heapq import *
 import random
 import time
@@ -53,7 +54,7 @@ class AgentRogue(BaseAgent):
         self.backtrack = False
         self.backtrackNodes = []
     
-    problemPathCost = {'p': 10, 's': 30, 'm': 100, 'w': 1000, 'u': -300}
+    tileCost = {MapTiles.P: 1, MapTiles.S: 3, MapTiles.M: 10, MapTiles.W: 100, MapTiles.U: -30}
 
     def neighbours(self, state, size):
         # topleft
@@ -101,7 +102,7 @@ class AgentRogue(BaseAgent):
         value = problem[state[0]][state[1]].value
         for neighbour in self.neighbours(state, len(problem) - 1):
             if neighbour == None:
-                value += 1000
+                value += MapTiles.W.value
             else:
                 value += problem[neighbour[0]][neighbour[1]].value
 
@@ -253,6 +254,8 @@ class AgentRogue(BaseAgent):
                 heappush(frontier, neighbour)
 
         current = node
+        for i in frontier:
+            print(i.state, i.estimateCost)
         node = heappop(frontier)
 
         if self.getDistance(current.state, node.state) > 1:
@@ -261,10 +264,12 @@ class AgentRogue(BaseAgent):
             if len(self.backtrackNodes):
                 bNode = self.backtrackNodes.pop()
                 return bNode.action
-
+        print(node.estimateCost)
         return node.action
 
     def step(self, location, strength, game_map, map_objects):
+        uf.print_map(game_map, 'e')
         action = self.solve(location, strength, game_map)
+        input()
         print("Action::",action)
         return action

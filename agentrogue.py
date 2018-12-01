@@ -1,3 +1,4 @@
+from agent import BaseAgent
 from heapq import *
 import random
 import time
@@ -247,4 +248,4 @@ def evaluateHeuristic(self, problem, state):
                 heappush(frontier, neighbour)
 
     def step(self, location, strength, game_map, map_objects):
-        self.solve(location, strength, game_map)
+        return self.solve(location, strength, game_map)

@@ -49,6 +49,8 @@ class AgentRogue(BaseAgent):
     def __init__(self, height, width, initial_strength, name='agent_rogue'):
         super().__init__(height=height, width=width,
                             initial_strength=initial_strength, name=name)
+
+        self.backtrack = False
     
     problemPathCost = {'p': 10, 's': 30, 'm': 100, 'w': 1000, 'u': -300}
 
@@ -163,8 +165,8 @@ class AgentRogue(BaseAgent):
             legalActions.append(Directions.EAST)
         return legalActions
     
-    def getBestNodeDistance(self, current, best):
-        return (abs(current[0] - best[0]) + abs(current[1] - best[1]))
+    def getDistance(self, current, other):
+        return (abs(current[0] - other[0]) + abs(current[1] - other[1]))
 
     def goalTest(self, node, goal):
         """
@@ -209,7 +211,7 @@ class AgentRogue(BaseAgent):
         heappush(frontier, node)
         while (True):
             if len(frontier) == 0:
-                return "Path does not exists."
+                return []
 
             node = heappop(frontier)
             if self.goalTest(node, goal.state):
@@ -242,14 +244,19 @@ class AgentRogue(BaseAgent):
         current = node
         node = heappop(frontier)
 
-        if self.getBestNodeDistance(current.state, node.state) > 1:
-            backtrackNodes = self.backtrackSearch(current, node, problem)
-            for backTrackNode in len(backtrackNodes):
-                return backTrackNode.action
+        if self.getDistance(current.state, node.state) > 1:
+            self.backtrack = True
+            self.backtrackNodes = self.backtrackSearch(current, node, problem)
+
+        if self.backtrack:
+            for backNode in len(self.backtrackNodes):
+                yield backNode.action
+
+            self.backtrack = False
         else:
             return node.action
 
     def step(self, location, strength, game_map, map_objects):
-        x = self.solve(location, strength, game_map)
-        print("Action::",x)
-        return x
+        action = self.solve(location, strength, game_map)
+        print("Action::",action)
+        return action

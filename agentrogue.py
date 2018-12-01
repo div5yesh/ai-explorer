@@ -51,6 +51,7 @@ class AgentRogue(BaseAgent):
                             initial_strength=initial_strength, name=name)
 
         self.backtrack = False
+        self.backtrackNodes = []
     
     problemPathCost = {'p': 10, 's': 30, 'm': 100, 'w': 1000, 'u': -300}
 
@@ -230,6 +231,14 @@ class AgentRogue(BaseAgent):
     def solve(self, start, strength, problem):
         explored = set()
         frontier = []
+
+        if self.backtrack:
+            if len(self.backtrackNodes):
+                bNode = self.backtrackNodes.pop()
+                return bNode.action
+            else:
+                self.backtrack = False
+
         node = Node(0, 0, start, None, None)
         explored.add(node.state)
 
@@ -249,14 +258,11 @@ class AgentRogue(BaseAgent):
         if self.getDistance(current.state, node.state) > 1:
             self.backtrack = True
             self.backtrackNodes = self.backtrackSearch(current, node, problem)
+            if len(self.backtrackNodes):
+                bNode = self.backtrackNodes.pop()
+                return bNode.action
 
-        if self.backtrack:
-            for backNode in len(self.backtrackNodes):
-                yield backNode.action
-
-            self.backtrack = False
-        else:
-            return node.action
+        return node.action
 
     def step(self, location, strength, game_map, map_objects):
         action = self.solve(location, strength, game_map)

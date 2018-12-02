@@ -230,7 +230,7 @@ class AgentRogue(BaseAgent):
                     if neighbour not in frontier and neighbour.state not in explored:
                         heappush(frontier, neighbour)
 
-    def solve(self, start, strength, problem):
+    def solve(self, current, strength, problem):
 
         if self.backtrack:
             if len(self.backtrackNodes):
@@ -239,7 +239,7 @@ class AgentRogue(BaseAgent):
             else:
                 self.backtrack = False
 
-        node = Node(0, 0, start, None, None)
+        node = Node(0, 0, current, None, None)
         self.explored.add(node.state)
 
         # get the list of all possible actions on the state

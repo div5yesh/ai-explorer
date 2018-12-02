@@ -15,6 +15,9 @@ from utils import Directions, MapTiles
 
 
 class State:
+    """
+    The object to represent a location of a tile.
+    """
 
     def __init__(self, *args):
         if len(args) == 1:
@@ -56,9 +59,6 @@ class State:
     def neighbours(self, map_size):
         """
         Return N,E,W,S neighbours one at a time on each iteration.
-
-        :param map_size:
-        :return:
         """
 
         if self.x > 0:

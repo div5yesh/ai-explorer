@@ -47,15 +47,14 @@ class Node:
         return str(self.state)
 
 class AgentRogue(BaseAgent):
-    def __init__(self, height, width, initial_strength, name='agent_rogue'):
-        super().__init__(height=height, width=width,
-                            initial_strength=initial_strength, name=name)
 
-        self.backtrack = False
-        self.backtrackNodes = []
-    
+    backtrack = False
+    backtrackNodes = []
     tileCost = {MapTiles.P: 1, MapTiles.S: 3, MapTiles.M: 10, MapTiles.W: 100, MapTiles.U: -30}
 
+    def __init__(self, height, width, initial_strength, name='agent_rogue'):
+        super().__init__(height=height, width=width, initial_strength=initial_strength, name=name)
+    
     def neighbours(self, state, size):
         # topleft
         # if(state[0] > 0 and state[1] > 0):

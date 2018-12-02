@@ -316,12 +316,16 @@ class AgentRogue(BaseAgent):
         self.explored.add(node.state)
 
         # get the list of all possible actions on the state
-        Actions = self.findActions(problem, node.state)
-        for action in Actions:
+        actions = self.findActions(problem, node.state)
+        if len(actions) == 0:
+            raise ValueError('This map cannot be solved.')
+
+        for action in actions:
             # generate a child node by applying actions to the current state
             neighbour = self.generateChild(problem, node, action)
+
             # check if child is already explored or present in beam
-            if neighbour not in self.frontier and neighbour.state not in self.explored:
+            if neighbour not in self.frontier or neighbour.state not in self.explored:
                 # add node to frontier only if it can contain within best k nodes
                 heappush(self.frontier, neighbour)
 
@@ -331,14 +335,15 @@ class AgentRogue(BaseAgent):
             node = heappop(self.frontier)
             if self.getDistance(current.state, node.state) > 1:
                 nodeTuple = self.backtrackSearch(current, node, problem)
-                self.backtrackNodes = nodeTuple[0]
-                if len(self.backtrackNodes):
-                    bNode = self.backtrackNodes.pop()
-                    if (strength > nodeTuple[1]):
-                        self.backtrack = True
-                        return bNode.action
-            else:
-                return node.action
+                if len(nodeTuple) == 2:
+                    self.backtrackNodes = nodeTuple[0]
+                    if len(self.backtrackNodes):
+                        bNode = self.backtrackNodes.pop()
+                        if strength > nodeTuple[1]:
+                            self.backtrack = True
+                            return bNode.action
+
+            return node.action
 
     def step(self, location, strength, game_map, map_objects):
         """

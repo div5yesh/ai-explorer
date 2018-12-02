@@ -3,6 +3,9 @@ CMSC 671 Fall 2018 – Project - AI-Explorer
 Team Name: Agent Rogue
 Team Members: Anushree Desai, Hakju Oh, Shree Hari, Divyesh Chitroda
 Libraries: GameDriver - https://github.com/erfannoury/cmsc671-fall2018 - 0.0.5
+
+Test Command: 
+python play.py --height 10 --width 10  --num-powerups 2 --num-monsters 1  --initial-strength 100 --save-dir map1/ --show-map --map-type=emoji --verbose
 """
 from agent import BaseAgent
 from utils import Directions, MapTiles
@@ -164,8 +167,6 @@ class AgentRogue(BaseAgent):
             state: tuple - (x,y). State of the agent on which to perform actions.
         Returns: [] -> list of actions.
         """
-        # print("problem.maptiles: ", MapTiles.W)
-        # print("problem: ", problem[0][0])
         size = len(problem) - 1
         legalActions = []
         if state[0] > 0 and problem[state[0] - 1][state[1]] != MapTiles.W:
@@ -264,24 +265,20 @@ class AgentRogue(BaseAgent):
                 heappush(self.frontier, neighbour)
 
         current = node
-        for i in self.frontier:
-            print(i.state, i.estimateCost)
-            
-        node = heappop(self.frontier)
 
-        if self.getDistance(current.state, node.state) > 1:
-            nodeTuple = self.backtrackSearch(current, node, problem)
-            self.backtrackNodes = nodeTuple[0]
-            if len(self.backtrackNodes):
-                bNode = self.backtrackNodes.pop()
-                if(strength > nodeTuple[1]):
-                    self.backtrack = True
-                    return bNode.action
-        print(node.estimateCost)
-        return node.action
+        while len(self.frontier) != 0:
+            node = heappop(self.frontier)
+            if self.getDistance(current.state, node.state) > 1:
+                nodeTuple = self.backtrackSearch(current, node, problem)
+                self.backtrackNodes = nodeTuple[0]
+                if len(self.backtrackNodes):
+                    bNode = self.backtrackNodes.pop()
+                    if(strength > nodeTuple[1]):
+                        self.backtrack = True
+                        return bNode.action
+            else:
+                return node.action
 
     def step(self, location, strength, game_map, map_objects):
         action = self.solve(location, strength, game_map)
-        input()
-        print("Action::",action)
         return action

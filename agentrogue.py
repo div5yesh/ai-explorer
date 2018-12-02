@@ -49,7 +49,9 @@ class Node:
 class AgentRogue(BaseAgent):
 
     backtrack = False
+    explored = set()
     backtrackNodes = []
+    frontier = []
     tileCost = {MapTiles.P: 1, MapTiles.S: 3, MapTiles.M: 10, MapTiles.W: 100, MapTiles.U: -30}
 
     def __init__(self, height, width, initial_strength, name='agent_rogue'):
@@ -229,8 +231,6 @@ class AgentRogue(BaseAgent):
                         heappush(frontier, neighbour)
 
     def solve(self, start, strength, problem):
-        explored = set()
-        frontier = []
 
         if self.backtrack:
             if len(self.backtrackNodes):
@@ -240,7 +240,7 @@ class AgentRogue(BaseAgent):
                 self.backtrack = False
 
         node = Node(0, 0, start, None, None)
-        explored.add(node.state)
+        self.explored.add(node.state)
 
         # get the list of all possible actions on the state
         Actions = self.findActions(problem, node.state)
@@ -248,14 +248,15 @@ class AgentRogue(BaseAgent):
             # generate a child node by applying actions to the current state
             neighbour = self.generateChild(problem, node, action)
             # check if child is already explored or present in beam
-            if neighbour not in frontier and neighbour.state not in explored:
+            if neighbour not in self.frontier and neighbour.state not in self.explored:
                 #add node to frontier only if it can contain within best k nodes
-                heappush(frontier, neighbour)
+                heappush(self.frontier, neighbour)
 
         current = node
-        for i in frontier:
+        for i in self.frontier:
             print(i.state, i.estimateCost)
-        node = heappop(frontier)
+            
+        node = heappop(self.frontier)
 
         if self.getDistance(current.state, node.state) > 1:
             self.backtrack = True

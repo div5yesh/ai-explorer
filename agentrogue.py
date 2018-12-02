@@ -2,6 +2,7 @@
 CMSC 671 Fall 2018 – Project - AI-Explorer
 Team Name: Agent Rogue
 Team Members: Anushree Desai, Hakju Oh, Shree Hari, Divyesh Chitroda
+Libraries: GameDriver - https://github.com/erfannoury/cmsc671-fall2018 - 0.0.5
 """
 from agent import BaseAgent
 from utils import Directions, MapTiles
@@ -46,6 +47,9 @@ class Node:
     def __str__(self):
         return str(self.state)
 
+"""
+Agent Rogue extends BaseAgent and implements step function.
+"""
 class AgentRogue(BaseAgent):
 
     backtrack = False
@@ -58,6 +62,9 @@ class AgentRogue(BaseAgent):
         super().__init__(height=height, width=width, initial_strength=initial_strength, name=name)
     
     def neighbours(self, state, size):
+        """
+        Return N,E,W,S neighbours one at a time on each iteration.
+        """
         # topleft
         # if(state[0] > 0 and state[1] > 0):
         #     yield (state[0] - 1, state[1] - 1)
@@ -209,7 +216,10 @@ class AgentRogue(BaseAgent):
         return Node(estimateCost, 0, state, node, action)
 
     def backtrackSearch(self, start, goal, problem):
-
+        """
+        Unifrom-cost search for finding the best from current node
+        to the best node
+        """
         explored = set()
         frontier = []
         node = Node(0, 0, start.state, None, None)

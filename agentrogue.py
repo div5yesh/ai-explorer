@@ -57,6 +57,7 @@ class AgentRogue(BaseAgent):
     backtrackNodes = []
     frontier = []
     tileCost = {MapTiles.P: 1, MapTiles.S: 3, MapTiles.M: 10, MapTiles.W: 100, MapTiles.U: -30}
+    backTrackTileCost = {MapTiles.P: 1, MapTiles.S: 3, MapTiles.M: 10, MapTiles.W: 100, MapTiles.U: sys.maxsize}
 
     def __init__(self, height, width, initial_strength, name='agent_rogue'):
         super().__init__(height=height, width=width, initial_strength=initial_strength, name=name)
@@ -212,8 +213,8 @@ class AgentRogue(BaseAgent):
 
     def generateBacktrackNode(self, problem, goal, node, action):
         state = self.applyAction(node.state, action)
-        estimateCost = node.actualCost + self.tileCost[problem[state[0]][state[1]]]
-        return Node(estimateCost, 0, state, node, action)
+        nodeCost = node.estimateCost + self.backTrackTileCost[problem[state[0]][state[1]]]
+        return Node(nodeCost, 0, state, node, action)
 
     def backtrackSearch(self, start, goal, problem):
         """
@@ -230,7 +231,7 @@ class AgentRogue(BaseAgent):
 
             node = heappop(frontier)
             if self.goalTest(node, goal.state):
-                return self.getExploredStates(node)
+                return (self.getExploredStates(node), node.estimateCost)
 
             explored.add(node.state)
             Actions = self.findActions(problem, node.state)
@@ -269,11 +270,13 @@ class AgentRogue(BaseAgent):
         node = heappop(self.frontier)
 
         if self.getDistance(current.state, node.state) > 1:
-            self.backtrack = True
-            self.backtrackNodes = self.backtrackSearch(current, node, problem)
+            nodeTuple = self.backtrackSearch(current, node, problem)
+            self.backtrackNodes = nodeTuple[0]
             if len(self.backtrackNodes):
                 bNode = self.backtrackNodes.pop()
-                return bNode.action
+                if(strength > nodeTuple[1]):
+                    self.backtrack = True
+                    return bNode.action
         print(node.estimateCost)
         return node.action
 

@@ -268,7 +268,6 @@ class AgentRogue(BaseAgent):
         return node.action
 
     def step(self, location, strength, game_map, map_objects):
-        uf.print_map(game_map, 'e')
         action = self.solve(location, strength, game_map)
         input()
         print("Action::",action)

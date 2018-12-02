@@ -52,8 +52,9 @@ def print_map(game_map, type='ascii'):
     (ascii, emoji, colorascii, or unicode).
     """
     printable_map = map_to_text(game_map, type)
+    print(" 0 1 2 3 4 5 6 7 8 9")
     for i in range(len(game_map)):
-        row = ""
+        row = str(i)
         for j in range(len(game_map[i])):
             row += printable_map[i][j]
             row += ' '

@@ -98,12 +98,12 @@ class AgentRogue(BaseAgent):
             yield None
 
     def evaluateHeuristic(self, problem, state):
-        value = problem[state[0]][state[1]].value
+        value = self.tileCost[problem[state[0]][state[1]]]
         for neighbour in self.neighbours(state, len(problem) - 1):
             if neighbour == None:
-                value += MapTiles.W.value
+                value += self.tileCost[MapTiles.W]
             else:
-                value += problem[neighbour[0]][neighbour[1]].value
+                value += self.tileCost[problem[neighbour[0]][neighbour[1]]]
 
         return value
 
@@ -203,7 +203,7 @@ class AgentRogue(BaseAgent):
 
     def generateBacktrackNode(self, problem, goal, node, action):
         state = self.applyAction(node.state, action)
-        estimateCost = node.actualCost + self.problemPathCost[problem[state[0]][state[1]]]
+        estimateCost = node.actualCost + self.tileCost[problem[state[0]][state[1]]]
         return Node(estimateCost, 0, state, node, action)
 
     def backtrackSearch(self, start, goal, problem):

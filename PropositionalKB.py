@@ -56,6 +56,9 @@ class PropsitionalKB:
     def isSafe(self, state):
         return not(self.isBoss(state) and self.isSkeleton(state) and self.isMonster(state))
     
+    def hasStrength(self, strength):
+        return strength > 50
+
     def getKB(self):
         return self.clauses
 

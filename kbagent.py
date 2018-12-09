@@ -28,11 +28,12 @@ class KBAgentRogue(BaseAgent):
     # def makeSentence(self, game_map, map_objects):
     #     self.kb.tellPercepts(game_map, map_objects)
 
-    def step(self, current, strength, game_map, map_objects):
+    def step(self, location, strength, game_map, map_objects):
         input()
         actions = []    
-        current = State(current)
-        self.visited.add(current)
+        location = State(location)
+        self.visited.add(location)
+        self.unvisited.remove(location)
         # TELL(KB, MAKE-PERCEPT-SENTENCE(percept, t))
         # self.kb.tell(self.makeSentence(game_map, map_objects))
         self.kb.tellPercepts(game_map, map_objects)
@@ -41,7 +42,7 @@ class KBAgentRogue(BaseAgent):
         
         # safe ← {[x, y] : ASK(KB, OK t x,y) = true}
         # query = Query("ok", getStates())
-        for neighbour in current.neighbours(len(game_map)):
+        for neighbour in location.neighbours(len(game_map)):
             if neighbour:
                 if neighbour not in self.visited:
                     self.unvisited.add(neighbour)
@@ -68,7 +69,7 @@ class KBAgentRogue(BaseAgent):
         # if self.kb.ask(query): ask strength to kb
         #     # plan ← [Grab] + PLAN-ROUTE(current,{[1,1]}, safe) + [Climb]
         #     actions = plan(current, {monsters, powerups}, safeStates)
-        actions = plan(current, [self.boss], game_map, self.safe) # strenght ??????????
+        actions = plan(location, [self.boss], game_map, self.safe) # strenght ??????????
         
         # if plan is empty then
         if len(actions) == 0:
@@ -76,25 +77,25 @@ class KBAgentRogue(BaseAgent):
             # query = Query("unknown", getStates())
 
             # plan ← PLAN-ROUTE(current, unvisited ∩safe, safe)
-            actions = plan(current, self.unvisited.union(self.safe), game_map, self.safe)
+            actions = plan(location, self.unvisited.intersection(self.safe), game_map, self.safe)
 
         # if plan is empty and ASK(KB, HaveArrow t) = true then
         # query = Query("powerup",{getStates(), strength})
         if len(actions) == 0 and self.kb.hasStrength(strength):
             # possible wumpus ← {[x, y] : ASK(KB,¬ Wx,y) = false}
             # plan ← PLAN-SHOT(current, possible wumpus, safe)
-            actions = plan(current, self.powerups, game_map, self.safe)
+            actions = plan(location, self.powerups, game_map, self.safe)
 
         # if plan is empty then // no choice but to take a risk
         if len(actions) == 0:
             # not unsafe ← {[x, y] : ASK(KB,¬ OK t x,y) = false}
             # plan ← PLAN-ROUTE(current, unvisited ∩not unsafe, safe)
-            actions = plan(current, self.unsafe.union(self.unvisited), game_map, self.safe)
+            actions = plan(location, self.unsafe.intersection(self.unvisited), game_map, self.safe)
 
         # if plan is empty then
         if len(actions) == 0:
             # plan ← PLAN-ROUTE(current,{[1, 1]}, safe) + [Climb]
-            actions = plan(current, self.boss, game_map, self.safe)
+            actions = plan(location, [self.boss], game_map, self.safe)
 
         action = actions.pop()
         # # TELL(KB, MAKE-ACTION-SENTENCE(action, t))

@@ -56,8 +56,14 @@ class PropsitionalKB:
     def isSafe(self, state):
         return not(self.isBoss(state) and self.isSkeleton(state) and self.isMonster(state))
     
-    def hasStrength(self, strength):
-        return strength > 50
+    def hasStrengthForBoss(self, strength):
+        return strength >= 90
+
+    def hasStrengthForDynamicMonster(self, strength):
+        return strength > len(self.game_map)/2
+    
+    def hasStrengthForSkeleton(self, strength):
+        return strength > 30
 
     def getKB(self):
         return self.clauses
@@ -76,4 +82,3 @@ print(propkb.getKB())
 propkb.tell(symbols('p'))
 print('now my kb is: ')
 print(propkb.getKB())
-

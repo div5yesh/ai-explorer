@@ -346,14 +346,8 @@ class AgentRogue(BaseAgent):
             return node.action
 
     def step(self, location, strength, game_map, map_objects):
-        """
-        
-        :param location: 
-        :param strength: 
-        :param game_map: 
-        :param map_objects: 
-        :return: 
-        """
-
+        print("game_map: ", game_map)
+        print("map objects: ", map_objects)
+        input()
         action = self.solve(location, strength, game_map)
         return action

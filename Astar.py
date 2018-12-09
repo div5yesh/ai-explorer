@@ -1,10 +1,11 @@
 from heapq import *
 import random
 import time
+from utils import *
 
 # path cost for traversing various terrains.
 # Mountain = 100calories, Sand = 30calories, Path = 10calories
-problemPathCost = {'p': 10, 's': 30, 'm': 100}
+tileCost = {MapTiles.P: 1, MapTiles.S: 3, MapTiles.M: 10, MapTiles.W: 100, MapTiles.U: -30}
 
 # cost of acceptable but not optimal path(calories)
 # satisficity = 300
@@ -19,13 +20,13 @@ def findActions(size, state):
     """
     legalActions = []
     if state[0] > 0:
-        legalActions.append('N')
+        legalActions.append(Directions.NORTH)
     if state[0] < size:
-        legalActions.append('S')
+        legalActions.append(Directions.SOUTH)
     if state[1] > 0:
-        legalActions.append('W')
+        legalActions.append(Directions.WEST)
     if state[1] < size:
-        legalActions.append('E')
+        legalActions.append(Directions.EAST)
     return legalActions
 
 def applyAction(state, action):
@@ -37,16 +38,16 @@ def applyAction(state, action):
     Returns: tuple -> (x,y). Next state of the agent.
     """
     # print(action)
-    if action == 'N':
+    if action == Directions.NORTH:
         return (state[0] - 1, state[1])
 
-    if action == 'E':
+    if action == Directions.EAST:
         return (state[0], state[1] + 1)
 
-    if action == 'W':
+    if action == Directions.WEST:
         return (state[0], state[1] - 1)
 
-    if action == 'S':
+    if action == Directions.SOUTH:
         return (state[0] + 1, state[1])
 
 def generateChild(problem, goal, node, action):
@@ -64,7 +65,7 @@ def generateChild(problem, goal, node, action):
     # get the next state
     state = applyAction(node.state, action)
     # calculate actual cost
-    actualCost = node.actualCost + problemPathCost[problem[state[0]][state[1]]]
+    actualCost = node.actualCost + tileCost[problem[state[0]][state[1]]].value
     # calculate hueristic cost
     heuristic = heuristicCost(state, goal)
     # calculate F(n) = estimated cost to reach the goal state
@@ -81,7 +82,7 @@ def heuristicCost(state, goal):
         goal: tuple(x,y). The goal state.
     Returns: int. Estimated cost to reach the goal
     """
-    return (abs(goal[0] - state[0]) + abs(goal[1] - state[1])) * problemPathCost['p']
+    return (abs(goal[0] - state[0]) + abs(goal[1] - state[1])) * MapTiles.PATH.value
 
 def getSolution(node):
     """
@@ -99,13 +100,6 @@ def getSolution(node):
         node = node.parent
 
     return (path, nodeCost)
-
-
-
-class Problem:
-
-    def __init__(self, goal):
-        self.goal = goal
 
 class Node:
     """
@@ -142,7 +136,7 @@ class Node:
         """
         return self.estimateCost < other.estimateCost
 
-def solve(start, goal, Problem, states):
+def AstarSearch(start, goal, Problem, safeStates = []):
     """
     Find the list of actions to perform on the start state to reach the goal
     state through optimal path with least cost.
@@ -189,8 +183,8 @@ def solve(start, goal, Problem, states):
                 if child.state not in explored and child not in frontier:
                     # add node with current state and path cost to reach the node from
                     # the start state to the frontier
-                    # if the states passed from the plan is in the frontier then only it will consider it
-                    if child.state in states:
+                    # if the safeStates passed from the plan is in the frontier then only it will consider it
+                    if child.state in safeStates:
                         heappush(frontier, child)
 
 
@@ -207,9 +201,6 @@ def goalTest(node, goal, frontier):
     """
     if node.state == goal:
         return node
-    for node in frontier:
-        if node.state == goal:
-            return node
 
 def generateTestProblem():
     """
@@ -237,11 +228,11 @@ def test():
     2. (4x4)matrix, start = (0, 0), goal = (2, 2), path = SSSEEN
     3. (5x5)matrix, start = (0, 1), goal = (2, 1), path = SS
     """
-    print(solve((1, 0), (2, 2), [['p', 'p', 'p'], ['p', 'm', 'p'], ['s', 's', 's']]))
-    print(solve((0, 0), (2, 2),
+    print(AstarSearch((1, 0), (2, 2), [['p', 'p', 'p'], ['p', 'm', 'p'], ['s', 's', 's']]))
+    print(AstarSearch((0, 0), (2, 2),
                 [['m', 'm', 'm', 's'], ['m', 'm', 'm', 's'], ['m', 'm', 'm', 's'], ['p', 'p', 'p', 'p']]))
     print(
-        solve((0, 1), (2, 1), [['m', 'p', 'p', 'p', 'p'], ['m', 'm', 'm', 'm', 'p'], ['m', 'p', 'm', 'm', 'p'],
+        AstarSearch((0, 1), (2, 1), [['m', 'p', 'p', 'p', 'p'], ['m', 'm', 'm', 'm', 'p'], ['m', 'p', 'm', 'm', 'p'],
                                ['m', 'p', 'm', 'm', 'p'], ['m', 'p', 'p', 'p', 'p']]))
 
     """
@@ -250,7 +241,7 @@ def test():
     randomTest1 = generateTestProblem()
     # log the start time before solving
     start = time.time()
-    print(solve(randomTest1[0], randomTest1[1], randomTest1[2]))
+    print(AstarSearch(randomTest1[0], randomTest1[1], randomTest1[2]))
     # log the end time after solving
     end = time.time()
     # print total time required to solve the problem

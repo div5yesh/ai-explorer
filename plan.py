@@ -1,12 +1,11 @@
 from Astar import *
+import sys
 
 def plan(start, goals, problem, states):
-    best = ()
+    best = tuple(None, sys.maxsize)
     for goal in range(len(goals)):
-        nodeResult = solve(start, goal, problem, states)
-        best(nodeResult)
-        if best(1) > nodeResult(1):
+        nodeResult = AstarSearch(start, goal, problem, states)
+        if best[1] > nodeResult[1]:
             best = nodeResult
 
-    return best(0)
-
+    return best[0]

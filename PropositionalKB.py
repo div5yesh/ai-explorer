@@ -35,23 +35,26 @@ class PropsitionalKB:
         return models
 
     def isMonster(self, state):
-        if (isinstance(self.map_objects[state], StaticMonster)): return True
-        else: return False
+        if (state.x, state.y) in self.map_objects:
+            if (isinstance(self.map_objects[(state.x, state.y)], StaticMonster)): return True
+            else: return False
 
     def isSkeleton(self, state):
-        if (isinstance(self.map_objects[state], BaseAgent)): return True
-        else: return False
+        if (state.x, state.y) in self.map_objects:
+            if (isinstance(self.map_objects[(state.x, state.y)], BaseAgent)): return True
+            else: return False
 
     def isBoss(self, state):
-        if (isinstance(self.map_objects[state], Boss)): return True
-        else: return False
+        if (state.x, state.y) in self.map_objects:
+            if (isinstance(self.map_objects[(state.x, state.y)], Boss)): return True
+            else: return False
 
     def isPowerUp(self, state):
         if (isinstance(self.map_objects[state], PowerUp)): return True
         else: return False
 
     def isSafe(self, state):
-        pass
+        return not(self.isBoss(state) and self.isSkeleton(state) and self.isMonster(state))
     
     def getKB(self):
         return self.clauses

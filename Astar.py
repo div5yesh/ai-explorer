@@ -2,15 +2,16 @@ from heapq import *
 import random
 import time
 from utils import *
+import sys
 
 # path cost for traversing various terrains.
 # Mountain = 100calories, Sand = 30calories, Path = 10calories
-tileCost = {MapTiles.P: 1, MapTiles.S: 3, MapTiles.M: 10, MapTiles.W: 100, MapTiles.U: -30}
+tileCost = {MapTiles.P: 1, MapTiles.S: 3, MapTiles.M: 10, MapTiles.W: sys.maxsize, MapTiles.U: sys.maxsize}
 
 # cost of acceptable but not optimal path(calories)
 # satisficity = 300
 
-def findActions(size, state):
+def findActions(size, state, problem):
     """
     Find all legal actions allowed on the state.
     Args:
@@ -18,14 +19,15 @@ def findActions(size, state):
         state: tuple - (x,y). State of the agent on which to perform actions.
     Returns: [] -> list of actions.
     """
+    size = len(problem) - 1
     legalActions = []
-    if state[0] > 0:
+    if state.x > 0 and problem[state.x - 1][state.y] != (MapTiles.W and MapTiles.U):
         legalActions.append(Directions.NORTH)
-    if state[0] < size:
+    if state.x < size and problem[state.x + 1][state.y] != (MapTiles.W and MapTiles.U):
         legalActions.append(Directions.SOUTH)
-    if state[1] > 0:
+    if state.y > 0 and problem[state.x][state.y - 1] != (MapTiles.W and MapTiles.U):
         legalActions.append(Directions.WEST)
-    if state[1] < size:
+    if state.y < size and problem[state.x][state.y + 1] != (MapTiles.W and MapTiles.U):
         legalActions.append(Directions.EAST)
     return legalActions
 
@@ -37,18 +39,7 @@ def applyAction(state, action):
         action: character - 'N'. Action to perform.
     Returns: tuple -> (x,y). Next state of the agent.
     """
-    # print(action)
-    if action == Directions.NORTH:
-        return (state[0] - 1, state[1])
-
-    if action == Directions.EAST:
-        return (state[0], state[1] + 1)
-
-    if action == Directions.WEST:
-        return (state[0], state[1] - 1)
-
-    if action == Directions.SOUTH:
-        return (state[0] + 1, state[1])
+    return state.move(action)
 
 def generateChild(problem, goal, node, action):
     """
@@ -65,7 +56,7 @@ def generateChild(problem, goal, node, action):
     # get the next state
     state = applyAction(node.state, action)
     # calculate actual cost
-    actualCost = node.actualCost + tileCost[problem[state[0]][state[1]]].value
+    actualCost = node.actualCost + tileCost[problem[state.x][state.y]].value
     # calculate hueristic cost
     heuristic = heuristicCost(state, goal)
     # calculate F(n) = estimated cost to reach the goal state
@@ -82,7 +73,7 @@ def heuristicCost(state, goal):
         goal: tuple(x,y). The goal state.
     Returns: int. Estimated cost to reach the goal
     """
-    return (abs(goal[0] - state[0]) + abs(goal[1] - state[1])) * MapTiles.PATH.value
+    return (abs(goal.x - state.x) + abs(goal.y - state.y)) * MapTiles.PATH.value
 
 def getSolution(node):
     """
@@ -100,41 +91,6 @@ def getSolution(node):
         node = node.parent
 
     return (path, nodeCost)
-
-class Node:
-    """
-    Node object for bookeeping of the current state, parent node for backtracking,
-    action performed to generate the node, actual cost and estimated cost.
-    """
-
-    def __init__(self, estimateCost, actualCost, state, parent, action):
-        """
-        Constructor
-        """
-        self.estimateCost = estimateCost
-        self.actualCost = actualCost
-        self.state = state
-        self.parent = parent
-        self.action = action
-
-    def __eq__(self, other):
-        """
-        Equal operator overload for membership testing of states in heapq
-        and replace the node having state with higher estimated cost if
-        node already present.
-        """
-        if other:
-            if self.state == other.state:
-                if self.estimateCost < other.estimateCost:
-                    other = self
-                return True
-
-    def __lt__(self, other):
-        """
-        Less than operator overload to compare estimated costs for heapify
-        comparisions in heapq, using the priority as estimated cost.
-        """
-        return self.estimateCost < other.estimateCost
 
 def AstarSearch(start, goal, Problem, safeStates = []):
     """
@@ -172,7 +128,7 @@ def AstarSearch(start, goal, Problem, safeStates = []):
         explored.add(node.state)
 
         # get the list of all possible actions on the state
-        Actions = findActions(len(Problem) - 1, node.state)
+        Actions = findActions(len(Problem) - 1, node.state, Problem)
         # expand a node and generate children
         for action in Actions:
             # generate a child node by applying actions to the current state

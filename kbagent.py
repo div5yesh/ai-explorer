@@ -8,6 +8,88 @@ from Predicates import isSafe, isMonster, isSkeleton, isBoss
 from plan import plan
 from utils import *
 
+class State:
+    """
+    The object to represent a location of a tile.
+    """
+
+    def __init__(self, *args):
+        if len(args) == 1:
+            if isinstance(args[0], tuple):
+                self._state = args[0]
+            elif isinstance(args[0], State):
+                self._state = (args[0].x, args[0].y)
+
+        elif len(args) == 2:
+            self._state = (int(args[0]), int(args[1]))
+
+        else:
+            raise ValueError
+
+    @property
+    def x(self):
+        return self._state[0]
+
+    @property
+    def y(self):
+        return self._state[1]
+
+    def move(self, direction):
+        if direction == Directions.NORTH:
+            return State(self.x - 1, self.y)
+
+        if direction == Directions.EAST:
+            return State(self.x, self.y + 1)
+
+        if direction == Directions.WEST:
+            return State(self.x, self.y - 1)
+
+        if direction == Directions.SOUTH:
+            return State(self.x + 1, self.y)
+
+    def distance(self, other):
+        return abs(self.x - other.x) + abs(self.y - other.y)
+
+    def neighbours(self, map_size):
+        """
+        Return N,E,W,S neighbours one at a time on each iteration.
+        """
+
+        if self.x > 0:
+            yield State(self.x - 1, self.y)
+        else:
+            yield None
+
+        if self.y < map_size - 1:
+            yield State(self.x, self.y + 1)
+        else:
+            yield None
+
+        if self.x < map_size - 1:
+            yield State(self.x + 1, self.y)
+        else:
+            yield None
+
+        if self.y > 0:
+            yield State(self.x, self.y - 1)
+        else:
+            yield None
+
+    def __eq__(self, other):
+        if other:
+            if self.x == other.x and self.y == other.y:
+                return True
+        return False
+
+    def __getitem__(self, item):
+        return self._state[item]
+
+    def __hash__(self):
+        return self._state.__hash__()
+
+    def __str__(self):
+        return str(self._state)
+
 class KBAgentRogue(BaseAgent):
 
     def __init__(self, height, width, initial_strength, name='KB_agent_rogue'):
@@ -17,6 +99,10 @@ class KBAgentRogue(BaseAgent):
         # self.kb.tell(Not(monster) | Not(boss) >> safe)
         self.visited = set()
         self.unvisited = set()
+        self.powerups = set()
+        self.monsters = set()
+        self.boss = None
+        self.agents = set()
         # self.kb.tell(Not(monster) | Not(skeleton) >> safe)
 
     # def makeSentence(self, game_map, map_objects):
@@ -25,6 +111,7 @@ class KBAgentRogue(BaseAgent):
     def step(self, current, strength, game_map, map_objects):
 
         actions = []    
+        current = State(current)
         self.visited.add(current)
         # TELL(KB, MAKE-PERCEPT-SENTENCE(percept, t))
         # self.kb.tell(self.makeSentence(game_map, map_objects))
@@ -46,9 +133,21 @@ class KBAgentRogue(BaseAgent):
 
         # # if ASK(KB, Glitter t) = true then
         # query = Query("fight", monster, strength)
-        # if self.kb.ask(query):
+        for (loc, item) in map_objects:
+            # self.agents = set() == ??????
+            if isinstance(item, PowerUp):
+                self.powerups.add(loc)
+            if isinstance(item, Boss):
+                self.boss = loc
+            elif isinstance(item, StaticMonster):
+                self.monsters.add(loc)
+            if isinstance(item, BaseAgent):
+                self.agents.add(loc)
+
+        # if self.kb.ask(query): ask strength to kb
         #     # plan ← [Grab] + PLAN-ROUTE(current,{[1,1]}, safe) + [Climb]
         #     actions = plan(current, {monsters, powerups}, safeStates)
+        actions = plan(current, self.boss, game_map, safeStates)
         
         # if plan is empty then
         if len(actions) == 0:
@@ -60,7 +159,6 @@ class KBAgentRogue(BaseAgent):
 
         # if plan is empty and ASK(KB, HaveArrow t) = true then
         # query = Query("powerup",{getStates(), strength})
-        query = powerup
         if len(actions) == 0 and self.kb.ask(query):
             # possible wumpus ← {[x, y] : ASK(KB,¬ Wx,y) = false}
             query = Query("powerup", {getStates(), strength})

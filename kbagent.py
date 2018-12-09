@@ -29,7 +29,7 @@ class KBAgentRogue(BaseAgent):
     #     self.kb.tellPercepts(game_map, map_objects)
 
     def step(self, current, strength, game_map, map_objects):
-
+        input()
         actions = []    
         current = State(current)
         self.visited.add(current)
@@ -68,7 +68,7 @@ class KBAgentRogue(BaseAgent):
         # if self.kb.ask(query): ask strength to kb
         #     # plan ← [Grab] + PLAN-ROUTE(current,{[1,1]}, safe) + [Climb]
         #     actions = plan(current, {monsters, powerups}, safeStates)
-        actions = plan(current, self.boss, game_map, self.safe) # strenght ??????????
+        actions = plan(current, [self.boss], game_map, self.safe) # strenght ??????????
         
         # if plan is empty then
         if len(actions) == 0:
@@ -103,9 +103,9 @@ class KBAgentRogue(BaseAgent):
         return action
 
 
-agent = KBAgentRogue(10,10, 100)
-agent.step((3,2), 100, [
-    ['u','u','u','u'], 
-    ['u','u','u','u'], 
-    ['u','s','p','s'], 
-    ['u','w','m','s']], {(2,2): StaticMonster() })
+# agent = KBAgentRogue(10,10, 100)
+# agent.step((3,2), 100, [
+#     [MapTiles.U,MapTiles.U,MapTiles.U,MapTiles.U], 
+#     [MapTiles.U,MapTiles.U,MapTiles.U,MapTiles.U], 
+#     [MapTiles.U,MapTiles.S,MapTiles.P,MapTiles.S], 
+#     [MapTiles.U,MapTiles.W,MapTiles.M,MapTiles.S]], {(2,2): StaticMonster() })

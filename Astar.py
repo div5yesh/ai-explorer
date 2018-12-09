@@ -56,7 +56,7 @@ def generateChild(problem, goal, node, action):
     # get the next state
     state = applyAction(node.state, action)
     # calculate actual cost
-    actualCost = node.actualCost + tileCost[problem[state.x][state.y]].value
+    actualCost = node.actualCost + tileCost[problem[state.x][state.y]]
     # calculate hueristic cost
     heuristic = heuristicCost(state, goal)
     # calculate F(n) = estimated cost to reach the goal state
@@ -85,9 +85,9 @@ def getSolution(node):
     to reach the goal node.
     """
     nodeCost = node.actualCost
-    path = ""
+    path = []
     while node.parent:
-        path = node.action + path
+        path.insert(0, node.action)
         node = node.parent
 
     return (path, nodeCost)
@@ -113,7 +113,7 @@ def AstarSearch(start, goal, Problem, safeStates = []):
         # if all nodes in the frontier are explored and path is not found, then
         # there exists no path.
         if len(frontier) == 0:
-            return "Path does not exists."
+            return ([], sys.maxsize)
 
         # select state with least cost from frontier
         node = heappop(frontier)

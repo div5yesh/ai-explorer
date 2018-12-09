@@ -6,6 +6,7 @@ from agent import RandomAgent
 from agent import HumanAgent
 from driver import GameDriver
 from agentrogue import AgentRogue
+from kbagent import KBAgentRogue
 from util_functions import MAP_TYPES
 
 
@@ -40,7 +41,7 @@ def main(args):
     args = parser.parse_args(args)
 
     # TODO: Change how agents are populated
-    agent = AgentRogue(args.height, args.width, args.initial_strength)
+    agent = KBAgentRogue(args.height, args.width, args.initial_strength)
 
     agents = [agent]
     if args.play_against_human:

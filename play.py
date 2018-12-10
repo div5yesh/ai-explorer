@@ -66,10 +66,10 @@ def main(args):
         mapresult = agent.evaluateAgentExploration(result[1])
         mapresults.append(mapresult)
     
-        won = sum([1 for x in results if x == True])
-        lose = sum([1 for x in results if x == False])
-        print('Rate:', (won / float(won + lose)))
-        print("Max:", max(mapresults), "Min:", min(mapresults), "Median:", mapresults[len(mapresults)//2], "Avg:", sum(mapresults)/len(mapresults))
+    won = sum([1 for x in results if x == True])
+    lose = sum([1 for x in results if x == False])
+    print('Rate:', (won / float(won + lose)))
+    print("Max:", max(mapresults), "Min:", min(mapresults), "Median:", mapresults[len(mapresults)//2], "Avg:", sum(mapresults)/len(mapresults))
 
 
 if __name__ == '__main__':

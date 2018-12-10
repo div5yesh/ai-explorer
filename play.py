@@ -6,7 +6,7 @@ from agent import RandomAgent
 from agent import HumanAgent
 from driver import GameDriver
 from agentrogue import AgentRogue
-from kbagent import KBAgentRogue
+from KnowledgeBasedAgent import KBAgentRogue
 from util_functions import MAP_TYPES
 
 

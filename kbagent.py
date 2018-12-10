@@ -69,8 +69,11 @@ class KBAgentRogue(BaseAgent):
         # if self.kb.ask(query): ask strength to kb
         #     # plan ← [Grab] + PLAN-ROUTE(current,{[1,1]}, safe) + [Climb]
         #     actions = plan(current, {monsters, powerups}, safeStates)
-        actions = plan(location, [self.boss], game_map, self.safe) # strenght ??????????
-        
+        # decision is a tuple, where, decision[0] is path and decision[1] is the cost required to explore that path
+        decision = plan(location, [self.boss], game_map, self.safe)
+        if(self.kb.hasStrengthForBoss(strength - decision[1])):
+            actions = decision[0]
+    
         # if plan is empty then
         if len(actions) == 0:
             # unvisited ← {[x, y] : ASK(KB, Lt x,y  ) = false for all t ≤ t}

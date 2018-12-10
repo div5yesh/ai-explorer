@@ -21,13 +21,13 @@ def findActions(size, state, problem):
     """
     size = len(problem) - 1
     legalActions = []
-    if state.x > 0 and problem[state.x - 1][state.y] != (MapTiles.W and MapTiles.U):
+    if state.x > 0 and (problem[state.x - 1][state.y] != MapTiles.W or problem[state.x - 1][state.y] != MapTiles.U):
         legalActions.append(Directions.NORTH)
-    if state.x < size and problem[state.x + 1][state.y] != (MapTiles.W and MapTiles.U):
+    if state.x < size and (problem[state.x + 1][state.y] != MapTiles.W or problem[state.x + 1][state.y] != MapTiles.U):
         legalActions.append(Directions.SOUTH)
-    if state.y > 0 and problem[state.x][state.y - 1] != (MapTiles.W and MapTiles.U):
+    if state.y > 0 and (problem[state.x][state.y - 1] != MapTiles.W or problem[state.x][state.y - 1] != MapTiles.U):
         legalActions.append(Directions.WEST)
-    if state.y < size and problem[state.x][state.y + 1] != (MapTiles.W and MapTiles.U):
+    if state.y < size and (problem[state.x][state.y + 1] != MapTiles.W or problem[state.x][state.y + 1] != MapTiles.U):
         legalActions.append(Directions.EAST)
     return legalActions
 

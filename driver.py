@@ -175,9 +175,11 @@ class GameDriver(object):
             self.agent_locations[idx] = final_loc
             if self.agent_strengths[idx] <= 0:
                 print(f'Agent {self.agents[idx].name} died!')
+                return (False, self.agent_maps[idx])
                 break
             elif final_loc == self.goal_loc:
                 print(f'Agent {self.agents[idx].name} won the game!')
+                return (True, self.agent_maps[idx])
                 break
 
     def initialize_game(self):

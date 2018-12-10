@@ -28,12 +28,15 @@ class KBAgentRogue(BaseAgent):
     # def makeSentence(self, game_map, map_objects):
     #     self.kb.tellPercepts(game_map, map_objects)
 
+    def evaluateAgentExploration(self, map):
+        explored = sum([1 for row in map for cell in row if cell != MapTiles.U])
+        return float(explored / (len(map) ** 2))
+
     def step(self, location, strength, game_map, map_objects):
-        input()
         actions = []
         location = State(location)
         self.visited.add(location)
-        if len(self.unvisited) != 0:
+        if location in self.unvisited:
             self.unvisited.remove(location)
         # TELL(KB, MAKE-PERCEPT-SENTENCE(percept, t))
         # self.kb.tell(self.makeSentence(game_map, map_objects))
@@ -91,7 +94,7 @@ class KBAgentRogue(BaseAgent):
             actions = decision[0]
 
         #ASK KB if the strength is greater than skeleton and the dynamic monster 
-        if self.kb.hasStrengthForSkeleton(strength) and self.kb.hasStrengthForDynamicMonster(strength):
+        if len(actions) == 0 and self.kb.hasStrengthForSkeleton(strength) and self.kb.hasStrengthForDynamicMonster(strength):
             #then fight the monster 
             decision = plan(location, self.monsters.union(self.agents), game_map, self.safe)
             actions = decision[0]

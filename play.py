@@ -48,17 +48,28 @@ def main(args):
         human = HumanAgent(args.height, args.width, args.initial_strength)
         agents.append(human)
 
-    game_driver = GameDriver(
-        height=args.height, width=args.width,
-        num_powerups=args.num_powerups,
-        num_monsters=args.num_monsters,
-        agents=agents,
-        initial_strength=args.initial_strength,
-        show_map=args.show_map, map_type=args.map_type,
-        save_dir=args.save_dir, map_file=args.map_file)
+    results = []
+    mapresults = []
+    for i in range(1000):
+        game_driver = GameDriver(
+            height=args.height, width=args.width,
+            num_powerups=args.num_powerups,
+            num_monsters=args.num_monsters,
+            agents=agents,
+            initial_strength=args.initial_strength,
+            show_map=args.show_map, map_type=args.map_type,
+            save_dir=args.save_dir, map_file=args.map_file)
 
-    print('Starting game')
-    game_driver.play(verbose=args.verbose)
+        print('Starting game')
+        result = game_driver.play(verbose=args.verbose)
+        results.append(result[0])
+        mapresult = agent.evaluateAgentExploration(result[1])
+        mapresults.append(mapresult)
+    
+        won = sum([1 for x in results if x == True])
+        lose = sum([1 for x in results if x == False])
+        print('Rate:', (won / float(won + lose)))
+        print("Max:", max(mapresults), "Min:", min(mapresults), "Median:", mapresults[len(mapresults)//2], "Avg:", sum(mapresults)/len(mapresults))
 
 
 if __name__ == '__main__':

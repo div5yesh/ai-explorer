@@ -84,15 +84,20 @@ class KBAgentRogue(BaseAgent):
 
         # if plan is empty and ASK(KB, HaveArrow t) = true then
         # query = Query("powerup",{getStates(), strength})
-        if len(actions) == 0 and self.kb.hasStrength(strength):
+        if len(actions) == 0:
             # possible wumpus ← {[x, y] : ASK(KB,¬ Wx,y) = false}
             # plan ← PLAN-SHOT(current, possible wumpus, safe)
             actions = plan(location, self.powerups, game_map, self.safe)
 
+        #ASK KB if the strength is greater than skeleton and the dynamic monster 
+        if self.kb.hasStrengthForSkeleton(strength) and self.kb.hasStrengthForDynamicMonster(strength):
+            #then fight the monster 
+            actions = plan(location, self.monsters.union(self.agents), game_map, self.safe)
+
         # if plan is empty then // no choice but to take a risk
         if len(actions) == 0:
             # not unsafe ← {[x, y] : ASK(KB,¬ OK t x,y) = false}
-            # plan ← PLAN-ROUTE(current, unvisited ∩not unsafe, safe)
+            # plan ← PLAN-ROUTE(current, unvisited nnot unsafe, safe)
             actions = plan(location, self.unsafe.intersection(self.unvisited), game_map, self.safe)
 
         # if plan is empty then

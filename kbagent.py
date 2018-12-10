@@ -30,7 +30,7 @@ class KBAgentRogue(BaseAgent):
 
     def step(self, location, strength, game_map, map_objects):
         input()
-        actions = []    
+        actions = []
         location = State(location)
         self.visited.add(location)
         if len(self.unvisited) != 0:
@@ -79,25 +79,29 @@ class KBAgentRogue(BaseAgent):
             # query = Query("unknown", getStates())
 
             # plan ← PLAN-ROUTE(current, unvisited ∩safe, safe)
-            actions = plan(location, self.unvisited.intersection(self.safe), game_map, self.safe)
+            decision = plan(location, self.unvisited.intersection(self.safe), game_map, self.safe)
+            actions = decision[0]
 
         # if plan is empty and ASK(KB, HaveArrow t) = true then
         # query = Query("powerup",{getStates(), strength})
         if len(actions) == 0:
             # possible wumpus ← {[x, y] : ASK(KB,¬ Wx,y) = false}
             # plan ← PLAN-SHOT(current, possible wumpus, safe)
-            actions = plan(location, self.powerups, game_map, self.safe)
+            decision = plan(location, self.powerups, game_map, self.safe)
+            actions = decision[0]
 
         #ASK KB if the strength is greater than skeleton and the dynamic monster 
         if self.kb.hasStrengthForSkeleton(strength) and self.kb.hasStrengthForDynamicMonster(strength):
             #then fight the monster 
-            actions = plan(location, self.monsters.union(self.agents), game_map, self.safe)
+            decision = plan(location, self.monsters.union(self.agents), game_map, self.safe)
+            actions = decision[0]
 
         # if plan is empty then // no choice but to take a risk
         if len(actions) == 0:
             # not unsafe ← {[x, y] : ASK(KB,¬ OK t x,y) = false}
             # plan ← PLAN-ROUTE(current, unvisited ∩not unsafe, safe)
-            actions = plan(location, self.unsafe.intersection(self.unvisited), game_map, self.safe)
+            decision = plan(location, self.unsafe.intersection(self.unvisited), game_map, self.safe)
+            actions = decision[0]
 
         # # if plan is empty then
         # if len(actions) == 0:

@@ -50,7 +50,7 @@ def main(args):
 
     results = []
     mapresults = []
-    for i in range(1000):
+    for i in range(1):
         game_driver = GameDriver(
             height=args.height, width=args.width,
             num_powerups=args.num_powerups,

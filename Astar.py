@@ -20,13 +20,13 @@ def findActions(size, state, problem):
     Returns: [] -> list of actions.
     """
     legalActions = []
-    if state.x > 0 and (problem[state.x - 1][state.y] != MapTiles.W or problem[state.x - 1][state.y] != MapTiles.U):
+    if state.x > 0 and (problem[state.x - 1][state.y] != MapTiles.W and problem[state.x - 1][state.y] != MapTiles.U):
         legalActions.append(Directions.NORTH)
-    if state.x < size and (problem[state.x + 1][state.y] != MapTiles.W or problem[state.x + 1][state.y] != MapTiles.U):
+    if state.x < size and (problem[state.x + 1][state.y] != MapTiles.W and problem[state.x + 1][state.y] != MapTiles.U):
         legalActions.append(Directions.SOUTH)
-    if state.y > 0 and (problem[state.x][state.y - 1] != MapTiles.W or problem[state.x][state.y - 1] != MapTiles.U):
+    if state.y > 0 and (problem[state.x][state.y - 1] != MapTiles.W and problem[state.x][state.y - 1] != MapTiles.U):
         legalActions.append(Directions.WEST)
-    if state.y < size and (problem[state.x][state.y + 1] != MapTiles.W or problem[state.x][state.y + 1] != MapTiles.U):
+    if state.y < size and (problem[state.x][state.y + 1] != MapTiles.W and problem[state.x][state.y + 1] != MapTiles.U):
         legalActions.append(Directions.EAST)
     return legalActions
 
@@ -72,7 +72,7 @@ def heuristicCost(state, goal):
         goal: tuple(x,y). The goal state.
     Returns: int. Estimated cost to reach the goal
     """
-    return (abs(goal.x - state.x) + abs(goal.y - state.y)) * MapTiles.PATH.value
+    return (abs(goal.x - state.x) + abs(goal.y - state.y)) * tileCost[MapTiles.PATH]
 
 def getSolution(node):
     """
@@ -91,7 +91,7 @@ def getSolution(node):
 
     return (path, nodeCost)
 
-def AstarSearch(start, goal, Problem, safeStates = []):
+def AstarSearch(start, goal, Problem, safeStates):
     """
     Find the list of actions to perform on the start state to reach the goal
     state through optimal path with least cost.
@@ -139,7 +139,7 @@ def AstarSearch(start, goal, Problem, safeStates = []):
                     # add node with current state and path cost to reach the node from
                     # the start state to the frontier
                     # if the safeStates passed from the plan is in the frontier then only it will consider it
-                    if child.state in safeStates:
+                    if len(safeStates) == 0 or child.state in safeStates:
                         heappush(frontier, child)
 
 

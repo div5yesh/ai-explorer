@@ -103,7 +103,7 @@ class KBAgentRogue(BaseAgent):
         if len(actions) == 0:
             # not unsafe ← {[x, y] : ASK(KB,¬ OK t x,y) = false}
             # plan ← PLAN-ROUTE(current, unvisited ∩not unsafe, safe)
-            decision = plan(location, self.unsafe.intersection(self.unvisited), game_map, self.safe)
+            decision = plan(location, self.unsafe.union(self.unvisited), game_map, [])
             actions = decision[0]
 
         # # if plan is empty then
@@ -111,7 +111,7 @@ class KBAgentRogue(BaseAgent):
         #     # plan ← PLAN-ROUTE(current,{[1, 1]}, safe) + [Climb]
         #     actions = plan(location, [self.boss], game_map, self.safe)
 
-        action = actions.pop()
+        action = actions[0]
         # # TELL(KB, MAKE-ACTION-SENTENCE(action, t))
         # self.kb.tell(self.makeSentence(action))
 

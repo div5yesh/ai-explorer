@@ -50,7 +50,7 @@ class PropsitionalKB:
         else: return False
 
     def isSafe(self, state):
-        return not(self.isBoss(state) and self.isSkeleton(state) and self.isMonster(state))
+        return not(self.isBoss(state) or self.isSkeleton(state) or self.isMonster(state))
     
     def hasStrengthForBoss(self, strength):
         return strength >= 90

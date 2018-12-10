@@ -10,4 +10,4 @@ def plan(start, goals, problem, states):
                         if bestDecision[1] > nodeResult[1]:
                                 bestDecision = nodeResult
 
-        return bestDecision
+    return bestDecision

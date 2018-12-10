@@ -33,7 +33,8 @@ class KBAgentRogue(BaseAgent):
         actions = []    
         location = State(location)
         self.visited.add(location)
-        self.unvisited.remove(location)
+        if len(self.unvisited) != 0:
+            self.unvisited.remove(location)
         # TELL(KB, MAKE-PERCEPT-SENTENCE(percept, t))
         # self.kb.tell(self.makeSentence(game_map, map_objects))
         self.kb.tellPercepts(game_map, map_objects)
@@ -50,8 +51,6 @@ class KBAgentRogue(BaseAgent):
                     self.safe.add(neighbour)
                 else:
                     self.unsafe.add(neighbour)
-
-        print(self.safe)
 
         # # if ASK(KB, Glitter t) = true then
         # query = Query("fight", monster, strength)
@@ -73,7 +72,7 @@ class KBAgentRogue(BaseAgent):
         decision = plan(location, [self.boss], game_map, self.safe)
         if(self.kb.hasStrengthForBoss(strength - decision[1])):
             actions = decision[0]
-    
+
         # if plan is empty then
         if len(actions) == 0:
             # unvisited ← {[x, y] : ASK(KB, Lt x,y  ) = false for all t ≤ t}
@@ -97,13 +96,13 @@ class KBAgentRogue(BaseAgent):
         # if plan is empty then // no choice but to take a risk
         if len(actions) == 0:
             # not unsafe ← {[x, y] : ASK(KB,¬ OK t x,y) = false}
-            # plan ← PLAN-ROUTE(current, unvisited nnot unsafe, safe)
+            # plan ← PLAN-ROUTE(current, unvisited ∩not unsafe, safe)
             actions = plan(location, self.unsafe.intersection(self.unvisited), game_map, self.safe)
 
-        # if plan is empty then
-        if len(actions) == 0:
-            # plan ← PLAN-ROUTE(current,{[1, 1]}, safe) + [Climb]
-            actions = plan(location, [self.boss], game_map, self.safe)
+        # # if plan is empty then
+        # if len(actions) == 0:
+        #     # plan ← PLAN-ROUTE(current,{[1, 1]}, safe) + [Climb]
+        #     actions = plan(location, [self.boss], game_map, self.safe)
 
         action = actions.pop()
         # # TELL(KB, MAKE-ACTION-SENTENCE(action, t))

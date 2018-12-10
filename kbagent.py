@@ -33,7 +33,8 @@ class KBAgentRogue(BaseAgent):
         actions = []    
         location = State(location)
         self.visited.add(location)
-        self.unvisited.remove(location)
+        if len(self.unvisited) != 0:
+            self.unvisited.remove(location)
         # TELL(KB, MAKE-PERCEPT-SENTENCE(percept, t))
         # self.kb.tell(self.makeSentence(game_map, map_objects))
         self.kb.tellPercepts(game_map, map_objects)
@@ -51,8 +52,6 @@ class KBAgentRogue(BaseAgent):
                 else:
                     self.unsafe.add(neighbour)
 
-        print(self.safe)
-
         # # if ASK(KB, Glitter t) = true then
         # query = Query("fight", monster, strength)
         for (loc, item) in map_objects:
@@ -69,7 +68,7 @@ class KBAgentRogue(BaseAgent):
         # if self.kb.ask(query): ask strength to kb
         #     # plan ← [Grab] + PLAN-ROUTE(current,{[1,1]}, safe) + [Climb]
         #     actions = plan(current, {monsters, powerups}, safeStates)
-        actions = plan(location, [self.boss], game_map, self.safe) # strenght ??????????
+        actions = plan(location, [self.boss], game_map, self.safe)
         
         # if plan is empty then
         if len(actions) == 0:
@@ -81,7 +80,7 @@ class KBAgentRogue(BaseAgent):
 
         # if plan is empty and ASK(KB, HaveArrow t) = true then
         # query = Query("powerup",{getStates(), strength})
-        if len(actions) == 0 and self.kb.hasStrength(strength):
+        if len(actions) == 0:
             # possible wumpus ← {[x, y] : ASK(KB,¬ Wx,y) = false}
             # plan ← PLAN-SHOT(current, possible wumpus, safe)
             actions = plan(location, self.powerups, game_map, self.safe)
@@ -92,10 +91,10 @@ class KBAgentRogue(BaseAgent):
             # plan ← PLAN-ROUTE(current, unvisited ∩not unsafe, safe)
             actions = plan(location, self.unsafe.intersection(self.unvisited), game_map, self.safe)
 
-        # if plan is empty then
-        if len(actions) == 0:
-            # plan ← PLAN-ROUTE(current,{[1, 1]}, safe) + [Climb]
-            actions = plan(location, [self.boss], game_map, self.safe)
+        # # if plan is empty then
+        # if len(actions) == 0:
+        #     # plan ← PLAN-ROUTE(current,{[1, 1]}, safe) + [Climb]
+        #     actions = plan(location, [self.boss], game_map, self.safe)
 
         action = actions.pop()
         # # TELL(KB, MAKE-ACTION-SENTENCE(action, t))

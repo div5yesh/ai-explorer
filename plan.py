@@ -2,14 +2,12 @@ from Astar import *
 import sys
 
 def plan(start, goals, problem, states):
-    best = tuple(([], sys.maxsize))
+    bestDecision = tuple(([], sys.maxsize))
     if len(goals):
         for goal in goals:
                 if goal:
                         nodeResult = AstarSearch(start, goal, problem, states)
-                        if best[1] > nodeResult[1]:
-                                best = nodeResult
+                        if bestDecision[1] > nodeResult[1]:
+                                bestDecision = nodeResult
 
-        return best[0]
-    else:
-            return []
+        return bestDecision

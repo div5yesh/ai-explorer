@@ -19,7 +19,6 @@ def findActions(size, state, problem):
         state: tuple - (x,y). State of the agent on which to perform actions.
     Returns: [] -> list of actions.
     """
-    size = len(problem) - 1
     legalActions = []
     if state.x > 0 and (problem[state.x - 1][state.y] != MapTiles.W or problem[state.x - 1][state.y] != MapTiles.U):
         legalActions.append(Directions.NORTH)

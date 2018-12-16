@@ -280,6 +280,7 @@ if __name__ == '__main__':
     initial_strength = 100
     num_powerups = 2
     num_monsters = 1
+    num_dynamic_monsters = 1
     save_dir = 'map1/'
     verbose = False
     show_map = False
@@ -287,7 +288,7 @@ if __name__ == '__main__':
     map_file = None
 
     results = []
-    count = 1000
+    count = 1
     for _ in range(count):
         agent = ProblemSolvingAgent(height, width, initial_strength)
         agents = [agent]
@@ -296,6 +297,7 @@ if __name__ == '__main__':
             height=height, width=width,
             num_powerups=num_powerups,
             num_monsters=num_monsters,
+            num_dynamic_monsters=num_dynamic_monsters,
             agents=agents,
             initial_strength=initial_strength,
             show_map=show_map, map_type=map_type,

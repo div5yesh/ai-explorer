@@ -1,17 +1,20 @@
-from heapq import *
 import random
-import time
-from utils import *
 import sys
+import time
+from heapq import *
+
+from base import Node
+from utils import *
 
 # path cost for traversing various terrains.
 # Mountain = 100calories, Sand = 30calories, Path = 10calories
-tileCost = {MapTiles.P: 1, MapTiles.S: 3, MapTiles.M: 10, MapTiles.W: sys.maxsize, MapTiles.U: sys.maxsize}
+tile_cost = {MapTiles.P: 1, MapTiles.S: 3, MapTiles.M: 10, MapTiles.W: sys.maxsize, MapTiles.U: sys.maxsize}
+
 
 # cost of acceptable but not optimal path(calories)
 # satisficity = 300
 
-def findActions(size, state, problem):
+def find_actions(size, state, problem):
     """
     Find all legal actions allowed on the state.
     Args:
@@ -19,18 +22,19 @@ def findActions(size, state, problem):
         state: tuple - (x,y). State of the agent on which to perform actions.
     Returns: [] -> list of actions.
     """
-    legalActions = []
+    legal_actions = []
     if state.x > 0 and (problem[state.x - 1][state.y] != MapTiles.W and problem[state.x - 1][state.y] != MapTiles.U):
-        legalActions.append(Directions.NORTH)
+        legal_actions.append(Directions.NORTH)
     if state.x < size and (problem[state.x + 1][state.y] != MapTiles.W and problem[state.x + 1][state.y] != MapTiles.U):
-        legalActions.append(Directions.SOUTH)
+        legal_actions.append(Directions.SOUTH)
     if state.y > 0 and (problem[state.x][state.y - 1] != MapTiles.W and problem[state.x][state.y - 1] != MapTiles.U):
-        legalActions.append(Directions.WEST)
+        legal_actions.append(Directions.WEST)
     if state.y < size and (problem[state.x][state.y + 1] != MapTiles.W and problem[state.x][state.y + 1] != MapTiles.U):
-        legalActions.append(Directions.EAST)
-    return legalActions
+        legal_actions.append(Directions.EAST)
+    return legal_actions
 
-def applyAction(state, action):
+
+def apply_action(state, action):
     """
     Generate next state by performing the action on the state.
     Args:
@@ -40,7 +44,8 @@ def applyAction(state, action):
     """
     return state.move(action)
 
-def generateChild(problem, goal, node, action):
+
+def generate_child(problem, goal, node, action):
     """
     Generate the child node by performing the legal action on the current state
     and calculating the estimated cost to reach to the goal state and actual cost to
@@ -53,16 +58,17 @@ def generateChild(problem, goal, node, action):
     Returns: Object - Node. The Child node.
     """
     # get the next state
-    state = applyAction(node.state, action)
+    state = apply_action(node.state, action)
     # calculate actual cost
-    actualCost = node.actualCost + tileCost[problem[state.x][state.y]]
-    # calculate hueristic cost
-    heuristic = heuristicCost(state, goal)
+    actual_cost = node.actual_cost + tile_cost[problem[state.x][state.y]]
+    # calculate heuristic cost
+    heuristic = heuristic_cost(state, goal)
     # calculate F(n) = estimated cost to reach the goal state
-    estimateCost = actualCost + heuristic
-    return Node(estimateCost, actualCost, state, node, action)
+    estimate_cost = actual_cost + heuristic
+    return Node(estimate_cost, actual_cost, state, node, action)
 
-def heuristicCost(state, goal):
+
+def heuristic_cost(state, goal):
     """
     Calculate the heuristic cost i.e. the Manhattan distance, to reach the goal
     from current state. This is the estimation of how far the goal state is from
@@ -72,26 +78,28 @@ def heuristicCost(state, goal):
         goal: tuple(x,y). The goal state.
     Returns: int. Estimated cost to reach the goal
     """
-    return (abs(goal.x - state.x) + abs(goal.y - state.y)) * tileCost[MapTiles.PATH]
+    return (abs(goal.x - state.x) + abs(goal.y - state.y)) * tile_cost[MapTiles.PATH]
 
-def getSolution(node):
+
+def get_solution(node):
     """
     Print the solution path by backtracking to the root node
-    following throught all the parent nodes.
+    following through all the parent nodes.
     Args:
         node: Object - Node. The node containing goal state at the end of the search.
     Returns: string. String of actions performed on root node
     to reach the goal node.
     """
-    nodeCost = node.actualCost
+    node_cost = node.actual_cost
     path = []
     while node.parent:
         path.insert(0, node.action)
         node = node.parent
 
-    return (path, nodeCost)
+    return path, node_cost
 
-def AstarSearch(start, goal, Problem, safeStates):
+
+def AStarSearch(start, goal, problem, safe_states):
     """
     Find the list of actions to perform on the start state to reach the goal
     state through optimal path with least cost.
@@ -99,6 +107,7 @@ def AstarSearch(start, goal, Problem, safeStates):
         start: tuple - (x,y). Start state of the agent
         goal: tuple - (x,y). Goal state to reach.
         problem: 2d list of characters - [['m','p'],['s','p']]. Problem with terrain as characters.
+        safe_states:
     Returns: string. Sequence of actions to take on start state to reach
     the goal state.
     """
@@ -106,44 +115,44 @@ def AstarSearch(start, goal, Problem, safeStates):
     frontier = []
 
     # push the start node to the frontier
-    heappush(frontier, Node(heuristicCost(start, goal), 0, start, None, None))
+    heappush(frontier, Node(heuristic_cost(start, goal), 0, start, None, None))
 
     while (1):
         # if all nodes in the frontier are explored and path is not found, then
         # there exists no path.
         if len(frontier) == 0:
-            return ([], sys.maxsize)
+            return [], sys.maxsize
 
         # select state with least cost from frontier
         node = heappop(frontier)
         # print(node.state)
         # goal test the current node
-        goalNode = goalTest(node, goal, frontier)
-        if goalNode:
+        goal_node = goal_test(node, goal, frontier)
+        if goal_node:
             # get the solution(seq. of actions)
-            return getSolution(goalNode)
+            return get_solution(goal_node)
 
         # add state to explored set
         explored.add(node.state)
 
         # get the list of all possible actions on the state
-        Actions = findActions(len(Problem) - 1, node.state, Problem)
+        actions = find_actions(len(problem) - 1, node.state, problem)
         # expand a node and generate children
-        for action in Actions:
+        for action in actions:
             # generate a child node by applying actions to the current state
-            child = generateChild(Problem, goal, node, action)
-            if child != None:
+            child = generate_child(problem, goal, node, action)
+            if child is not None:
                 # check if child is already explored or present in frontier and
                 # (Ref: Line 144)replace the frontier node with child if the child has lower cost
                 if child.state not in explored and child not in frontier:
                     # add node with current state and path cost to reach the node from
                     # the start state to the frontier
                     # if the safeStates passed from the plan is in the frontier then only it will consider it
-                    if len(safeStates) == 0 or child.state in safeStates:
+                    if len(safe_states) == 0 or child.state in safe_states:
                         heappush(frontier, child)
 
 
-def goalTest(node, goal, frontier):
+def goal_test(node, goal, frontier):
     """
     Test whether the goal state has been reached, if not find a goal state
     in frontier that is satisfiable(<= 300 calories), but not optimal.
@@ -157,7 +166,8 @@ def goalTest(node, goal, frontier):
     if node.state == goal:
         return node
 
-def generateTestProblem():
+
+def generate_test_problem():
     """
     Generates random problem with m, p & s terrain of size from 5x5 to 100x100.
     Selects random size of the terrain, random start and goal state.
@@ -176,6 +186,7 @@ def generateTestProblem():
 
     return (start, goal, terrain)
 
+
 def test():
     """
     Known Test Examples
@@ -183,24 +194,25 @@ def test():
     2. (4x4)matrix, start = (0, 0), goal = (2, 2), path = SSSEEN
     3. (5x5)matrix, start = (0, 1), goal = (2, 1), path = SS
     """
-    print(AstarSearch((1, 0), (2, 2), [['p', 'p', 'p'], ['p', 'm', 'p'], ['s', 's', 's']]))
-    print(AstarSearch((0, 0), (2, 2),
-                [['m', 'm', 'm', 's'], ['m', 'm', 'm', 's'], ['m', 'm', 'm', 's'], ['p', 'p', 'p', 'p']]))
+    print(AStarSearch((1, 0), (2, 2), [['p', 'p', 'p'], ['p', 'm', 'p'], ['s', 's', 's']]))
+    print(AStarSearch((0, 0), (2, 2),
+                      [['m', 'm', 'm', 's'], ['m', 'm', 'm', 's'], ['m', 'm', 'm', 's'], ['p', 'p', 'p', 'p']]))
     print(
-        AstarSearch((0, 1), (2, 1), [['m', 'p', 'p', 'p', 'p'], ['m', 'm', 'm', 'm', 'p'], ['m', 'p', 'm', 'm', 'p'],
-                               ['m', 'p', 'm', 'm', 'p'], ['m', 'p', 'p', 'p', 'p']]))
+        AStarSearch((0, 1), (2, 1), [['m', 'p', 'p', 'p', 'p'], ['m', 'm', 'm', 'm', 'p'], ['m', 'p', 'm', 'm', 'p'],
+                                     ['m', 'p', 'm', 'm', 'p'], ['m', 'p', 'p', 'p', 'p']]))
 
     """
     Testing randomly generated problems
     """
-    randomTest1 = generateTestProblem()
+    randomTest1 = generate_test_problem()
     # log the start time before solving
     start = time.time()
-    print(AstarSearch(randomTest1[0], randomTest1[1], randomTest1[2]))
+    print(AStarSearch(randomTest1[0], randomTest1[1], randomTest1[2]))
     # log the end time after solving
     end = time.time()
     # print total time required to solve the problem
     print(end - start)
+
 
 """
 Randomly Generated Test Examples:
@@ -221,6 +233,3 @@ WWNWWNWWWWWSWWNWWWWWWWSSWWWSWSSWSSSWWSWSWWWWWWWWWWSWWWSSSWWSWSWWWWWWWWW
 """
 
 # test()
-
-
-

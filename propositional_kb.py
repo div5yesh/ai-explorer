@@ -4,16 +4,17 @@ from sympy import *
 from sympy.logic.boolalg import And, Not, conjuncts, to_cnf
 from itertools import chain
 
-class PropsitionalKB:
-    def __init__(self, sentence = None):
+
+class PropositionalKB:
+    def __init__(self, sentence=None):
         self.clauses = []
         if sentence:
             self.tell(sentence)
-    
+
     def tell(self, sentence):
         self.clauses.extend(conjuncts(to_cnf(sentence)))
 
-    def tellPercepts(self, game_map, map_objects):
+    def tell_percepts(self, game_map, map_objects):
         self.game_map = game_map
         self.map_objects = map_objects
 
@@ -26,42 +27,42 @@ class PropsitionalKB:
 
     def ask(self, query):
         models = self.entails(self.clauses, query, all_models=True)
-        # for i in models:
-        #     print(i)
         return models
 
-    def isMonster(self, state):
+    def is_monster(self, state):
         if (state.x, state.y) in self.map_objects:
-            if (isinstance(self.map_objects[(state.x, state.y)], StaticMonster)): return True
-            else: return False
+            if isinstance(self.map_objects[(state.x, state.y)], StaticMonster):
+                return True
+        return False
 
-    def isSkeleton(self, state):
+    def is_skeleton(self, state):
         if (state.x, state.y) in self.map_objects:
-            if (isinstance(self.map_objects[(state.x, state.y)], BaseAgent)): return True
-            else: return False
+            if isinstance(self.map_objects[(state.x, state.y)], BaseAgent):
+                return True
+        return False
 
-    def isBoss(self, state):
+    def is_boss(self, state):
         if (state.x, state.y) in self.map_objects:
-            if (isinstance(self.map_objects[(state.x, state.y)], Boss)): return True
-            else: return False
+            if isinstance(self.map_objects[(state.x, state.y)], Boss):
+                return True
+        return False
 
-    def isPowerUp(self, state):
-        if (isinstance(self.map_objects[state], PowerUp)): return True
-        else: return False
+    def is_power_up(self, state):
+        return isinstance(self.map_objects[state], PowerUp)
 
-    def isSafe(self, state):
-        return not(self.isBoss(state) or self.isSkeleton(state) or self.isMonster(state))
-    
-    def hasStrengthForBoss(self, strength):
+    def is_safe(self, state):
+        return not (self.is_boss(state) or self.is_skeleton(state) or self.is_monster(state))
+
+    def has_enough_strength_for_boss(self, strength):
         return strength >= 90
 
-    def hasStrengthForDynamicMonster(self, strength):
-        return strength > len(self.game_map)/2
-    
-    def hasStrengthForSkeleton(self, strength):
+    def has_enough_strength_for_dynamic_monster(self, strength):
+        return strength > len(self.game_map) / 2
+
+    def has_enough_strength_for_skeleton(self, strength):
         return strength > 30
 
-    def getKB(self):
+    def get_KB(self):
         return self.clauses
 
     # def ask(self, query):

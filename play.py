@@ -5,9 +5,9 @@ from argparse import ArgumentParser
 from agent import RandomAgent
 from agent import HumanAgent
 from driver import GameDriver
-from agentrogue import AgentRogue
-from KnowledgeBasedAgent import KBAgentRogue
-from util_functions import MAP_TYPES
+from utils import InvalidMapError
+
+MAP_TYPES = ['ascii', 'emoji']
 
 
 def main(args):
@@ -21,6 +21,8 @@ def main(args):
                         help='Number of powerups to put in the game map')
     parser.add_argument('--num-monsters', type=int, required=True,
                         help='Number of monsters to put in the game map')
+    parser.add_argument('--num-dynamic-monsters', type=int, required=True,
+                        help='Number of dynamic monsters to put in the game')
     parser.add_argument('--initial-strength', default=100, type=int,
                         help='Initial strength of each agent')
     parser.add_argument('--save-dir', type=str,
@@ -41,35 +43,34 @@ def main(args):
     args = parser.parse_args(args)
 
     # TODO: Change how agents are populated
-    agent = KBAgentRogue(args.height, args.width, args.initial_strength)
+    agent = RandomAgent(args.height, args.width, args.initial_strength)
 
     agents = [agent]
     if args.play_against_human:
         human = HumanAgent(args.height, args.width, args.initial_strength)
         agents.append(human)
 
-    results = []
-    mapresults = []
-    for i in range(1):
+    try:
         game_driver = GameDriver(
             height=args.height, width=args.width,
             num_powerups=args.num_powerups,
             num_monsters=args.num_monsters,
+            num_dynamic_monsters=args.num_dynamic_monsters,
             agents=agents,
             initial_strength=args.initial_strength,
             show_map=args.show_map, map_type=args.map_type,
             save_dir=args.save_dir, map_file=args.map_file)
+    except InvalidMapError as e:
+        print('The game map could not be created!')
+        print(e)
+        print('Restart the game')
 
-        print('Starting game')
-        result = game_driver.play(verbose=args.verbose)
-        results.append(result[0])
-        mapresult = agent.evaluateAgentExploration(result[1])
-        mapresults.append(mapresult)
-    
-    won = sum([1 for x in results if x == True])
-    lose = sum([1 for x in results if x == False])
-    print('Rate:', (won / float(won + lose)))
-    print("Max:", max(mapresults), "Min:", min(mapresults), "Median:", mapresults[len(mapresults)//2], "Avg:", sum(mapresults)/len(mapresults))
+    print('Starting game')
+    try:
+        game_driver.play(verbose=args.verbose)
+    except StopIteration as e:
+        print(e)
+        return
 
 
 if __name__ == '__main__':

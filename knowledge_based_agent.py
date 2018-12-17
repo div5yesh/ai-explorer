@@ -76,7 +76,7 @@ class KBAgentRogue(BaseAgent):
         if len(map_objects) != self.len_of_map_objects:
             self.on_change_map_objects(map_objects)
 
-        if len(self.frontiers) == 0:
+        while len(self.frontiers) == 0:
             # if self.kb.ask(query): ask strength to kb
             #     # plan ← [Grab] + PLAN-ROUTE(current,{[1,1]}, safe) + [Climb]
             #     actions = plan(current, {monsters, powerups}, safeStates)

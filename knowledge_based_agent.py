@@ -58,7 +58,7 @@ class KBAgentRogue(BaseAgent):
         # self.kb.tell(self.makeSentence(game_map, map_objects))
         self.kb.tell_percepts(game_map, map_objects)
 
-        # TELL the KB the temporal “physics” sentences for time t
+        # TELL the KB the temporal “physics” sentences for time 't'
 
         # safe ← {[x, y] : ASK(KB, OK t x,y) = true}
         # query = Query("ok", getStates())
@@ -136,16 +136,16 @@ class KBAgentRogue(BaseAgent):
         else:
             return action.direction
 
-
+# conditioning on the algorithm 
 def plan(start, goals, problem, states, algorithm='a-star'):
     if goals is None or len(goals) == 0:
         return [], sys.maxsize
-
+    # if a-star search is used 
     if algorithm == 'a-star':
         results = [a_star_search(start, State(goal), problem, states) for goal in goals if goal is not None]
         results = sorted(results, key=lambda x: x[1])
         return results[0]
-
+    # if depth-limited is used
     if algorithm == 'depth-limited':
         return depth_limited_search(start, goals, problem)
 

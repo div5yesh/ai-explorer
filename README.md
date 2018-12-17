@@ -19,3 +19,9 @@ To implement a new agent, create a new agent class inheriting from the `BaseAgen
 * Python >= 3.6
 * Numpy
 * Emoji (package: emoji) -- if you want emoji maps
+
+# Driver Code: v0.1.2
+Refer: https://github.com/erfannoury/cmsc671-fall2018
+
+# Contributers: 
+Anushree Desai, Divyesh Chitroda, Hakju Oh, Shree Hari

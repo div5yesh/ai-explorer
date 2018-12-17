@@ -115,7 +115,7 @@ def a_star_search(start, goal, problem, safe_states):
     frontier = []
 
     # push the start node to the frontier
-    heappush(frontier, Node(heuristic_cost(start, goal), 0, start, None, None))
+    heappush(frontier, Node(0, 0, start, None, None))
 
     while True:
         # if all nodes in the frontier are explored and path is not found, then

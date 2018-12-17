@@ -135,7 +135,7 @@ def plan(start, goals, problem, states, algorithm='a-star'):
         return [], sys.maxsize
 
     if algorithm == 'a-star':
-        results = [a_star_search(start, goal, problem, states) for goal in goals if goal is not None]
+        results = [a_star_search(start, State(goal), problem, states) for goal in goals if goal is not None]
         results = sorted(results, key=lambda x: x[1])
         return results[0]
 

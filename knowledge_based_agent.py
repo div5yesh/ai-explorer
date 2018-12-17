@@ -93,6 +93,13 @@ class KBAgentRogue(BaseAgent):
                 # plan ← PLAN-SHOT(current, possible wumpus, safe)
                 decision = plan(location, self.power_ups, game_map, safe, algorithm='a-star')
                 self.frontiers = decision[0]
+            
+            # if plan is empty and ASK(KB, agentNearMe) = true then
+            if len(self.frontiers) == 0:
+                # possible wumpus ← {[x, y] : ASK(KB,¬ Wx,y) = false}
+                # plan ← PLAN-SHOT(current, possible wumpus, safe)
+                decision = plan(location, self.agents, game_map, safe, algorithm='a-star')
+                self.frontiers = decision[0]
 
             if len(self.frontiers) == 0 and self.boss is not None:
                 decision = plan(location, [self.boss, ], game_map, safe, algorithm='a-star')

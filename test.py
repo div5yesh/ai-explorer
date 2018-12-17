@@ -1,5 +1,6 @@
 from driver import GameDriver
 from knowledge_based_agent import KBAgentRogue
+from utils import InvalidMapError
 
 if __name__ == '__main__':
     height, width = 10, 10
@@ -31,6 +32,8 @@ if __name__ == '__main__':
         print('Starting game')
         try:
             game_driver.play(verbose=verbose)
+        except InvalidMapError as e:
+            continue
         except StopIteration as e:
             if 'won' in e.value:
                 results.append(True)

@@ -1,14 +1,12 @@
 # References:
 # 1. Algorithm Adapted from Artificial Intelligence: A Modern Approach, 3rd. Edition, Stuart J. Russell and Peter Norvig, p. 270. Prentice Hall, 2009.
-import copy
-import math
-import random
 import sys
-from collections import namedtuple
 from itertools import product
 
+from a_star import a_star_search
 from agent import BaseAgent
 from base import State
+from depth_limited import depth_limited_search
 from propositional_kb import PropositionalKB
 from utils import *
 
@@ -85,7 +83,7 @@ class KBAgentRogue(BaseAgent):
             # ASK KB if the strength is greater than skeleton and the dynamic monster
             if len(self.monsters) > 0 and self.kb.has_enough_strength_for_monster(strength):
                 # then fight the monster
-                decision = plan(location, self.monsters, game_map, safe)
+                decision = plan(location, self.monsters, game_map, safe, algorithm='a-star')
                 self.frontiers = decision[0]
 
             # if plan is empty and ASK(KB, HaveArrow t) = true then
@@ -93,11 +91,11 @@ class KBAgentRogue(BaseAgent):
             if len(self.frontiers) == 0 and self.kb.has_not_enough_strength(strength):
                 # possible wumpus ← {[x, y] : ASK(KB,¬ Wx,y) = false}
                 # plan ← PLAN-SHOT(current, possible wumpus, safe)
-                decision = plan(location, self.power_ups, game_map, safe)
+                decision = plan(location, self.power_ups, game_map, safe, algorithm='a-star')
                 self.frontiers = decision[0]
 
             if len(self.frontiers) == 0 and self.boss is not None:
-                decision = plan(location, [self.boss, ], game_map, safe)
+                decision = plan(location, [self.boss, ], game_map, safe, algorithm='a-star')
                 if self.kb.has_enough_strength_for_boss(strength - decision[1]):
                     self.frontiers = decision[0]
 
@@ -106,14 +104,14 @@ class KBAgentRogue(BaseAgent):
                 # unvisited ← {[x, y] : ASK(KB, Lt x,y  ) = false for all t ≤ t}
                 # query = Query("unknown", getStates())
                 # plan ← PLAN-ROUTE(current, unvisited ∩ safe, safe)
-                decision = plan(location, self.unvisited.intersection(safe), game_map, safe)
+                decision = plan(location, self.unvisited.intersection(safe), game_map, safe, algorithm='a-star')
                 self.frontiers = decision[0]
 
             # if plan is empty then // no choice but to take a risk
             if len(self.frontiers) == 0:
                 # not unsafe ← {[x, y] : ASK(KB,¬ OK t x,y) = false}
                 # plan ← PLAN-ROUTE(current, unvisited, safe)
-                decision = plan(location, self.unvisited, game_map, [])
+                decision = plan(location, self.unvisited, game_map, [], algorithm='depth-limited')
                 self.frontiers = decision[0]
 
             # # if plan is empty then
@@ -132,106 +130,19 @@ class KBAgentRogue(BaseAgent):
             return action.direction
 
 
-def plan(start, goals, problem, states):
+def plan(start, goals, problem, states, algorithm='a-star'):
     if goals is None or len(goals) == 0:
         return [], sys.maxsize
 
-    shape = problem.shape
-    depth_limit = int(math.sqrt(shape[0] * shape[1]) / 2)
+    if algorithm == 'a-star':
+        results = [a_star_search(start, goal, problem, states) for goal in goals if goal is not None]
+        results = sorted(results, key=lambda x: x[1])
+        return results[0]
 
-    if len(goals) > depth_limit:
-        goals = random.choices(list(goals), k=depth_limit)
+    if algorithm == 'depth-limited':
+        return depth_limited_search(start, goals, problem)
 
-    searcher = DepthLimitedSearch(problem, states, depth_limit=depth_limit)
-    path_costs = [x for x in [searcher.search(start, goal) for goal in goals if goal is not None] if x is not None]
-    sorted(path_costs, key=lambda x: x[1], reverse=True)
-    if len(path_costs) == 0:
-        return [], sys.maxsize
-
-    best_decision = path_costs[0]
-    return best_decision.path, best_decision.cost
-
-
-Action = namedtuple('Action', ['location', 'direction'])
-PathCost = namedtuple('PathCost', ['path', 'cost'])
-
-
-class DepthLimitedSearch(object):
-
-    def __init__(self, problem, states, depth_limit):
-        self.problem = problem
-        self.states = states
-        self.depth_limit = depth_limit
-
-    def search(self, start, goal):
-        paths = self._search([], start, goal, 0)
-        path_costs = [PathCost(path=path, cost=self.cost(path)) for path in paths]
-        sorted(path_costs, key=lambda x: x.cost)
-        return path_costs[0] if len(path_costs) > 0 else None
-
-    def _search(self, past_path, current_location, goal, depth):
-        children = self.expand(current_location, goal)
-        if len(children) == 0 or depth > self.depth_limit:
-            return [past_path, ]
-
-        past_locations = [l for l, _ in past_path]
-        results = []
-        for child in children:
-            if child.location in past_locations:
-                continue
-
-            path = copy.deepcopy(past_path)
-            path.append(child)
-
-            if self.is_unknown(child.location):
-                results.append(path)
-            else:
-                for p in self._search(path, child.location, goal, depth + 1):
-                    results.append(p)
-
-        return results if len(results) > 0 else [past_path, ]
-
-    def cost(self, path):
-        costs = 0
-        for location, direction in path:
-            tile = self.problem[location.y][location.x]
-            if tile == MapTiles.U:
-                costs = costs - 1
-                break
-
-            costs = costs + tile.value
-
-        return costs
-
-    def expand(self, cur_loc, goal):
-        children = []
-
-        if cur_loc.x != goal.x:
-            children.append(Action(location=cur_loc.move(Directions.WEST), direction=Directions.WEST))
-            children.append(Action(location=cur_loc.move(Directions.EAST), direction=Directions.EAST))
-        if cur_loc.y != goal.y:
-            children.append(Action(location=cur_loc.move(Directions.NORTH), direction=Directions.NORTH))
-            children.append(Action(location=cur_loc.move(Directions.SOUTH), direction=Directions.SOUTH))
-
-        return [child for child in children if self.is_available(child.location)]
-
-    def is_available(self, location):
-        shape = self.problem.shape
-        if location.x < 0 or location.x >= shape[0]:
-            return False
-        if location.y < 0 or location.y >= shape[1]:
-            return False
-        if self.is_wall(location):
-            return False
-        return True
-
-    def is_wall(self, location):
-        tile = self.problem[location.x][location.y]
-        return tile == MapTiles.W
-
-    def is_unknown(self, location):
-        tile = self.problem[location.x][location.y]
-        return tile == MapTiles.U
+    raise ValueError
 
     # agent = KBAgentRogue(10,10, 100)
 # agent.step((3,2), 100, [

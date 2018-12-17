@@ -3,7 +3,7 @@ import sys
 import time
 from heapq import *
 
-from base import Node
+from base import Node, Action
 from utils import *
 
 # path cost for traversing various terrains.
@@ -93,13 +93,13 @@ def get_solution(node):
     node_cost = node.actual_cost
     path = []
     while node.parent:
-        path.insert(0, node.action)
+        path.insert(0, Action(location=node.state, direction=node.action))
         node = node.parent
 
     return path, node_cost
 
 
-def AStarSearch(start, goal, problem, safe_states):
+def a_star_search(start, goal, problem, safe_states):
     """
     Find the list of actions to perform on the start state to reach the goal
     state through optimal path with least cost.
@@ -194,12 +194,12 @@ def test():
     2. (4x4)matrix, start = (0, 0), goal = (2, 2), path = SSSEEN
     3. (5x5)matrix, start = (0, 1), goal = (2, 1), path = SS
     """
-    print(AStarSearch((1, 0), (2, 2), [['p', 'p', 'p'], ['p', 'm', 'p'], ['s', 's', 's']]))
-    print(AStarSearch((0, 0), (2, 2),
-                      [['m', 'm', 'm', 's'], ['m', 'm', 'm', 's'], ['m', 'm', 'm', 's'], ['p', 'p', 'p', 'p']]))
+    print(a_star_search((1, 0), (2, 2), [['p', 'p', 'p'], ['p', 'm', 'p'], ['s', 's', 's']]))
+    print(a_star_search((0, 0), (2, 2),
+                        [['m', 'm', 'm', 's'], ['m', 'm', 'm', 's'], ['m', 'm', 'm', 's'], ['p', 'p', 'p', 'p']]))
     print(
-        AStarSearch((0, 1), (2, 1), [['m', 'p', 'p', 'p', 'p'], ['m', 'm', 'm', 'm', 'p'], ['m', 'p', 'm', 'm', 'p'],
-                                     ['m', 'p', 'm', 'm', 'p'], ['m', 'p', 'p', 'p', 'p']]))
+        a_star_search((0, 1), (2, 1), [['m', 'p', 'p', 'p', 'p'], ['m', 'm', 'm', 'm', 'p'], ['m', 'p', 'm', 'm', 'p'],
+                                       ['m', 'p', 'm', 'm', 'p'], ['m', 'p', 'p', 'p', 'p']]))
 
     """
     Testing randomly generated problems
@@ -207,7 +207,7 @@ def test():
     randomTest1 = generate_test_problem()
     # log the start time before solving
     start = time.time()
-    print(AStarSearch(randomTest1[0], randomTest1[1], randomTest1[2]))
+    print(a_star_search(randomTest1[0], randomTest1[1], randomTest1[2]))
     # log the end time after solving
     end = time.time()
     # print total time required to solve the problem

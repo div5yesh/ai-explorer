@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 from utils import Directions
 
 
@@ -126,3 +128,7 @@ class Node:
 
     def __str__(self):
         return str(self.state)
+
+
+Action = namedtuple('Action', ['location', 'direction'])
+PathCost = namedtuple('PathCost', ['path', 'cost'])

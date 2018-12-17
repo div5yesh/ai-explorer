@@ -1,11 +1,17 @@
-from utils import *
-from sympy import *
-from sympy.logic.boolalg import And, Not, conjuncts, to_cnf
 from itertools import chain
+
+from sympy import *
+from sympy.logic.boolalg import conjuncts, to_cnf
+
+from utils import *
 
 
 class PropositionalKB:
+
     def __init__(self, sentence=None):
+        self.game_map = None
+        self.map_objects = None
+
         self.clauses = []
         if sentence:
             self.tell(sentence)
@@ -28,21 +34,18 @@ class PropositionalKB:
         models = self.entails(self.clauses, query, all_models=True)
         return models
 
-    def is_agent(self, state):
-        if (state.x, state.y) in self.map_objects:
-            if isinstance(self.map_objects[(state.x, state.y)], AgentPlaceholder):
-                return True
-        return False
-
     def is_monster(self, state):
-        if (state.x, state.y) in self.map_objects:
-            if isinstance(self.map_objects[(state.x, state.y)], StaticMonster) or isinstance(self.map_objects[(state.x, state.y)], DynamicMonster):
-                return True
-        return False
+        return self.is_something(state, StaticMonster) or self.is_something(state, DynamicMonster)
 
     def is_boss(self, state):
+        return self.is_something(state, Boss)
+
+    def is_agent(self, state):
+        return self.is_something(state, AgentPlaceholder)
+
+    def is_something(self, state, clazz):
         if (state.x, state.y) in self.map_objects:
-            if isinstance(self.map_objects[(state.x, state.y)], Boss):
+            if isinstance(self.map_objects[(state.x, state.y)], clazz):
                 return True
         return False
 
@@ -50,16 +53,16 @@ class PropositionalKB:
         return isinstance(self.map_objects[state], PowerUp)
 
     def is_safe(self, state):
-        return not (self.is_boss(state) or self.is_monster(state) or self.is_agent(state))
+        return not (self.is_monster(state) or self.is_agent(state))
 
     def has_enough_strength_for_boss(self, strength):
         return strength >= 90
 
-    def has_enough_strength_for_dynamic_monster(self, strength):
-        return strength > len(self.game_map) / 2
-
-    def has_enough_strength_for_skeleton(self, strength):
+    def has_enough_strength_for_monster(self, strength):
         return strength > 30
+
+    def has_not_enough_strength(self, strength):
+        return strength < 100
 
     def get_KB(self):
         return self.clauses

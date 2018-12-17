@@ -81,7 +81,10 @@ class State:
         return self._state.__hash__()
 
     def __str__(self):
-        return str(self._state)
+        return '(%d,%d)' % (self.x, self.y)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class Node:

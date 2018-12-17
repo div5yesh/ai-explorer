@@ -36,14 +36,14 @@ class KBAgentRogue(BaseAgent):
         self.agents.clear()
         self.frontiers.clear()
 
-        for (loc, item) in map_objects:
-            if isinstance(item, PowerUp):
+        for loc in map_objects:
+            if isinstance(map_objects[loc], PowerUp):
                 self.power_ups.add(loc)
-            if isinstance(item, Boss):
+            if isinstance(map_objects[loc], Boss):
                 self.boss = loc
-            elif isinstance(item, StaticMonster) or isinstance(item, DynamicMonster):
+            elif isinstance(map_objects[loc], StaticMonster) or isinstance(map_objects[loc], DynamicMonster):
                 self.monsters.add(loc)
-            if isinstance(item, AgentPlaceholder):
+            if isinstance(map_objects[loc], AgentPlaceholder):
                 self.agents.add(loc)
 
         self.len_of_map_objects = len(map_objects)

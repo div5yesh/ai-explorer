@@ -148,7 +148,7 @@ def a_star_search(start, goal, problem, safe_states):
                     # add node with current state and path cost to reach the node from
                     # the start state to the frontier
                     # if the safeStates passed from the plan is in the frontier then only it will consider it
-                    if (len(safe_states) == 0) or (child.state in safe_states) or (child.state == goal.state):
+                    if (len(safe_states) == 0) or (child.state in safe_states) or (child.state == goal):
                         heappush(frontier, child)
 
 

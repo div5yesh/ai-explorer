@@ -1,5 +1,4 @@
 from utils import *
-from agent import BaseAgent
 from sympy import *
 from sympy.logic.boolalg import And, Not, conjuncts, to_cnf
 from itertools import chain
@@ -29,15 +28,15 @@ class PropositionalKB:
         models = self.entails(self.clauses, query, all_models=True)
         return models
 
-    def is_monster(self, state):
+    def is_agent(self, state):
         if (state.x, state.y) in self.map_objects:
-            if isinstance(self.map_objects[(state.x, state.y)], StaticMonster):
+            if isinstance(self.map_objects[(state.x, state.y)], AgentPlaceholder):
                 return True
         return False
 
-    def is_skeleton(self, state):
+    def is_monster(self, state):
         if (state.x, state.y) in self.map_objects:
-            if isinstance(self.map_objects[(state.x, state.y)], BaseAgent):
+            if isinstance(self.map_objects[(state.x, state.y)], StaticMonster) or isinstance(self.map_objects[(state.x, state.y)], DynamicMonster):
                 return True
         return False
 
@@ -51,7 +50,7 @@ class PropositionalKB:
         return isinstance(self.map_objects[state], PowerUp)
 
     def is_safe(self, state):
-        return not (self.is_boss(state) or self.is_skeleton(state) or self.is_monster(state))
+        return not (self.is_boss(state) or self.is_monster(state) or self.is_agent(state))
 
     def has_enough_strength_for_boss(self, strength):
         return strength >= 90

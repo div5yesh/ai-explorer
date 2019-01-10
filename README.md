@@ -2,6 +2,8 @@
 AI agent for an adaptation of DreamQuest game.
 CMSC 671 (AI), Fall 2018
 
+Team Members: Anushree Desai, Divyesh Chitroda, Hakju Oh, Shree Hari
+
 Group Project Description
 
 Please read this carefully (even though it is long) and start thinking about the steps involved in designing
